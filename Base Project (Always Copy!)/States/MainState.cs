@@ -12,7 +12,6 @@ namespace Plasma_Fractal
     {
         int width, height;
         Color[,] points;
-        Color[,] colours;
 
         double roughness = 8;
         double screenSize = 0;
@@ -82,7 +81,11 @@ namespace Plasma_Fractal
         public Color GenColour (double finalVal)
         {
             //High Mountains
-            if (finalVal < 25)
+            if (finalVal < 10)
+            {
+                return Color.WhiteSmoke;
+            }
+            else if (finalVal < 25)
             {
                 return Color.DarkGray;
             }
@@ -158,7 +161,6 @@ namespace Plasma_Fractal
             double Max = rectSize / screenSize * roughness;
             return (rand.NextDouble() - 0.5) * Max;
         }
-
 
         public void Update()
         {

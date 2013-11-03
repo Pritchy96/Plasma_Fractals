@@ -14,7 +14,7 @@ namespace Plasma_Fractal
             InitializeComponent();
             //Changing some properties:
             this.DoubleBuffered = true;
-            this.Dock = DockStyle.Fill;
+            //this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
         }
 
