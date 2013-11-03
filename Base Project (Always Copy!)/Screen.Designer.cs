@@ -28,28 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.DrawScreen = new Plasma_Fractal.DBPanel();
-            this.groupBox1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // groupBox1
+            // panel1
             // 
-            this.groupBox1.Controls.Add(this.DrawScreen);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(465, 444);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "groupBox1";
+            this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.DrawScreen);
+            this.panel1.Location = new System.Drawing.Point(0, 1);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(600, 600);
+            this.panel1.TabIndex = 0;
             // 
             // DrawScreen
             // 
             this.DrawScreen.AutoScroll = true;
             this.DrawScreen.BackColor = System.Drawing.Color.White;
-            this.DrawScreen.Location = new System.Drawing.Point(18, 19);
+            this.DrawScreen.Location = new System.Drawing.Point(3, 3);
             this.DrawScreen.Name = "DrawScreen";
-            this.DrawScreen.Size = new System.Drawing.Size(484, 462);
+            this.DrawScreen.Size = new System.Drawing.Size(798, 624);
             this.DrawScreen.TabIndex = 0;
             this.DrawScreen.Paint += new System.Windows.Forms.PaintEventHandler(this.Redraw);
             this.DrawScreen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MouseClick);
@@ -61,14 +60,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1424, 862);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Screen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnExit);
             this.Load += new System.EventHandler(this.Screen_Load);
-            this.groupBox1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -76,7 +75,8 @@
         #endregion
 
         private DBPanel DrawScreen;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Panel panel1;
+
 
     }
 }
