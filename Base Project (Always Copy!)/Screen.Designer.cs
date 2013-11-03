@@ -34,10 +34,9 @@
             // DrawScreen
             // 
             this.DrawScreen.BackColor = System.Drawing.Color.White;
-            this.DrawScreen.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DrawScreen.Location = new System.Drawing.Point(0, 0);
             this.DrawScreen.Name = "DrawScreen";
-            this.DrawScreen.Size = new System.Drawing.Size(284, 262);
+            this.DrawScreen.Size = new System.Drawing.Size(500, 500);
             this.DrawScreen.TabIndex = 0;
             this.DrawScreen.Paint += new System.Windows.Forms.PaintEventHandler(this.Redraw);
             this.DrawScreen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MouseClick);
@@ -47,7 +46,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.ClientSize = new System.Drawing.Size(501, 500);
             this.Controls.Add(this.DrawScreen);
             this.Name = "Screen";
             this.Text = "Form1";

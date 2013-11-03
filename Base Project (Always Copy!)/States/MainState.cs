@@ -13,7 +13,7 @@ namespace Plasma_Fractal
         int width, height;
         double[,] points;
 
-        double roughness = 2;
+        double roughness = 10;
         double screenSize = 0;
         Random rand = new Random();
 
@@ -40,14 +40,14 @@ namespace Plasma_Fractal
         }
 
         //X and Y are the old c1 coordinates from the last recursive iteration.
-        void Divide(double[,] points, int x, int y, int width, int height, double c1, double c2, double c3, double c4)
+        void Divide(double[,] points, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
 
             double middle, mid1, mid2, mid3, mid4;
 
             //calculate width and hight of new rectangle by halving the last.
-            int newWidth = (int) Math.Floor((double) width / 2);
-            int newHeight = (int)Math.Floor((double)height / 2);
+            double newWidth =  width / 2;
+            double newHeight = height / 2;
 
             //If our rectangles are bigger than 1px x 1px.
             if (width > 1 && height > 1)
@@ -77,7 +77,7 @@ namespace Plasma_Fractal
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
                 //Use X, Y as it's a single pixel.
-                points[x, y] = finalVal;
+                points[(int)(x), (int)(y)] = finalVal;
             }
         }
 
