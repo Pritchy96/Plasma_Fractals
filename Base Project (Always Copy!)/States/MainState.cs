@@ -13,10 +13,9 @@ namespace Plasma_Fractal
         int width, height;
         double[,] points;
 
-        double roughness = 10;
+        double roughness = 80;
         double screenSize = 0;
         Random rand = new Random();
-
 
         public void Begin()
         {
@@ -50,7 +49,7 @@ namespace Plasma_Fractal
             double newHeight = height / 2;
 
             //If our rectangles are bigger than 1px x 1px.
-            if (width > 1 && height > 1)
+            if (width > 1 || height > 1)
             {
                 //Square Step.
                 //Calculate middle Point by averaging corners and then adding a random displacement.

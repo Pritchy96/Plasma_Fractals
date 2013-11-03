@@ -31,6 +31,9 @@ namespace Plasma_Fractal
             InitializeComponent();
             this.Width = width;
             this.Height = height;
+          //  this.TopMost = true;
+           // this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+           // this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             BeginThread();
         }
 
@@ -102,6 +105,11 @@ namespace Plasma_Fractal
         private void Repaint(object sender, PaintEventArgs e)
         {
             manager.Redraw(e);
+        }
+
+        private void Screen_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
