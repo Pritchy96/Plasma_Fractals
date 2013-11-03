@@ -81,25 +81,55 @@ namespace Plasma_Fractal
 
         public Color GenColour (double finalVal)
         {
+            //High Mountains
             if (finalVal < 25)
             {
                 return Color.DarkGray;
             }
+            //Low Mountains
             else if (finalVal < 50)
             {
                 return Color.Gray;
             }
-            else if (finalVal < 140)
+            //Dark grass
+            else if (finalVal < 70)
+            {
+                return Color.DarkGreen;
+            }
+            //Light Grass
+            else if (finalVal < 145)
             {
                 return Color.Green;
             }
+            //Shore 1 - Inner Light Sand
             else if (finalVal < 150)
             {
-                return Color.Yellow;
+                return Color.FromArgb(227, 227, 69);
             }
+            //Shore 2 - Outer Dark Sand
+            else if (finalVal < 148)
+            {
+                return Color.FromArgb(217, 217, 0);
+            }
+            //Shore 3 - Water
+            else if (finalVal < 155)
+            {
+                return Color.FromArgb(0, 178, 178);
+            }
+            //Reef
+            else if (finalVal < 170)
+            {
+                return Color.FromArgb(0, 163, 217);
+            }
+            //Sea
+            else if (finalVal < 200)
+            {
+                return Color.FromArgb(0, 133, 178);
+            }
+            //Deep Sea
             else
             {
-                return Color.Blue;
+                return Color.FromArgb(0, 105, 140);
             }
         }
 
