@@ -11,9 +11,10 @@ namespace Plasma_Fractal
     class MainState
     {
         int width, height;
-        double[,] points;
+        Color[,] points;
+        Color[,] colours;
 
-        double roughness = 80;
+        double roughness = 8;
         double screenSize = 0;
         Random rand = new Random();
 
@@ -23,11 +24,7 @@ namespace Plasma_Fractal
             screenSize = width + height;
             //Create array to be filled out at the end.
             //It is the size of the pixel size of the area we are generating a Fractal for.
-            points = new double[width, height];
-            points[0, 2] = 0.8;
-            points[0, 3] = 0.8;
-            points[0, 4] = 0.8;
-            points[0, 5] = 0.8;
+            points = new Color[width, height];
             //Calculate corner values (c1, c2, c3, c4).
             double c1 = rand.NextDouble();
             double c2 = rand.NextDouble();
@@ -39,7 +36,7 @@ namespace Plasma_Fractal
         }
 
         //X and Y are the old c1 coordinates from the last recursive iteration.
-        void Divide(double[,] points, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
+        void Divide(Color[,] points, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
 
             double middle, mid1, mid2, mid3, mid4;
@@ -75,8 +72,34 @@ namespace Plasma_Fractal
             {
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
+
+
                 //Use X, Y as it's a single pixel.
-                points[(int)(x), (int)(y)] = finalVal;
+                points[(int)(x), (int)(y)] = GenColour(finalVal * 255);
+            }
+        }
+
+        public Color GenColour (double finalVal)
+        {
+            if (finalVal < 25)
+            {
+                return Color.DarkGray;
+            }
+            else if (finalVal < 50)
+            {
+                return Color.Gray;
+            }
+            else if (finalVal < 140)
+            {
+                return Color.Green;
+            }
+            else if (finalVal < 150)
+            {
+                return Color.Yellow;
+            }
+            else
+            {
+                return Color.Blue;
             }
         }
 
@@ -125,7 +148,7 @@ namespace Plasma_Fractal
             {
                 for (int j = 0; j < points.GetLength(1); j++)
                 {
-                    e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb((int)(points[i, j] * 255), (int)(points[i, j] * 255), (int)(points[i, j] * 255))), new Rectangle(i, j, 1, 1));
+                    e.Graphics.FillRectangle(new SolidBrush(points[i, j]), new Rectangle(i, j, 1, 1));
                 }
             }
         }
