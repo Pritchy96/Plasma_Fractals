@@ -14,8 +14,8 @@ namespace Plasma_Fractal
     public partial class Screen : Form
     {
         //Screen size.
-        public static int width = 900;
-        public static int height = 900;
+        public static int width = 850;
+        public static int height = 850;
 
         //Thread Variables.
         Boolean Running = false;
@@ -31,7 +31,7 @@ namespace Plasma_Fractal
             InitializeComponent();
             this.Width = width;
             this.Height = height;
-            this.TopMost = true;
+            //this.TopMost = true;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             BeginThread();
