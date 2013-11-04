@@ -90,26 +90,26 @@ namespace Plasma_Fractal
             //High Mountains
             if (finalVal < 10)
             {
-                return Color.WhiteSmoke;
+                return Color.FromArgb(245,245,245);
             }
             else if (finalVal < 25)
             {
-                return Color.DarkGray;
+                return Color.FromArgb(169,169,169);
             }
             //Low Mountains
             else if (finalVal < 50)
             {
-                return Color.Gray;
+                return Color.FromArgb(128, 128, 128);
             }
             //Dark grass
             else if (finalVal < 70)
             {
-                return Color.DarkGreen;
+                return Color.FromArgb(0, 100, 0);
             }
             //Light Grass
             else if (finalVal < 145)
             {
-                return Color.Green;
+                return Color.FromArgb(0, 128, 0);
             }
             //Shore 1 - Inner Light Sand
             else if (finalVal < 150)
