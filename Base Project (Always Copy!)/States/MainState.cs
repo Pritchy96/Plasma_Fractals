@@ -11,19 +11,29 @@ namespace Plasma_Fractal
     class MainState
     {
         int width, height;
-        Color[,] points;
-
         double roughness = 8;
         double screenSize = 0;
         Random rand = new Random();
+        DBPanel display;
+        Bitmap finishedImage;
+
+        public MainState(int width, int height, DBPanel display)
+        {
+            this.width = width;
+            this.height = height;
+            this.display = display;
+            finishedImage = new Bitmap(width, height);
+            Begin();
+        }
+
+        public void Update()
+        {
+        }
 
         public void Begin()
         {
             //Set screenSize.
             screenSize = width + height;
-            //Create array to be filled out at the end.
-            //It is the size of the pixel size of the area we are generating a Fractal for.
-            points = new Color[width, height];
             //Calculate corner values (c1, c2, c3, c4).
             double c1 = rand.NextDouble();
             double c2 = rand.NextDouble();
@@ -31,13 +41,12 @@ namespace Plasma_Fractal
             double c4 = rand.NextDouble();
 
             //Call Divide, begin the iteration.
-            Divide(points, 0, 0, width, height, c1, c2, c3, c4);
+            Divide(0, 0, width, height, c1, c2, c3, c4);
         }
 
         //X and Y are the old c1 coordinates from the last recursive iteration.
-        void Divide(Color[,] points, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
+        void Divide(double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
-
             double middle, mid1, mid2, mid3, mid4;
 
             //calculate width and hight of new rectangle by halving the last.
@@ -54,17 +63,16 @@ namespace Plasma_Fractal
                 //Diamond Step.
                 //Calculating the edge points in order for the 4 points of each rectangle to all have values.
                 //this is just the average of the two points it bisects.
-                //POSSIBLY WRONG.
                 mid1 = Round((c1 + c2) / 2);
                 mid2 = Round((c1 + c3) / 2);
                 mid3 = Round((c2 + c4) / 2);
                 mid4 = Round((c3 + c4) / 2);
 
                 //Call divide to calculate the middle of the new rectangles.
-                Divide(points, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
-                Divide(points, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
-                Divide(points, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
-                Divide(points, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
+                Divide(x, y, newWidth, newHeight, c1, mid1, mid2, middle);
+                Divide(x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
+                Divide(x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
+                Divide(x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
             }
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
@@ -72,9 +80,8 @@ namespace Plasma_Fractal
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
-
-                //Use X, Y as it's a single pixel.
-                points[(int)(x), (int)(y)] = GenColour(finalVal * 255);
+                //places the current pixel we are working with to within the image.
+                finishedImage.SetPixel((int)x, (int)y, GenColour(finalVal * 255));
             }
         }
 
@@ -136,13 +143,6 @@ namespace Plasma_Fractal
             }
         }
 
-        public MainState(int width, int height)
-        {
-            this.width = width;
-            this.height = height;
-            Begin();
-        }
-
         //Makes sure values stay within limits.
         public double Round(double num)
         {
@@ -155,15 +155,10 @@ namespace Plasma_Fractal
         }
 
         //Displaces value a small amount.
-        //I don't entirely understand this. What does it achieve?
         public double Displace(double rectSize)
         {
             double Max = rectSize / screenSize * roughness;
             return (rand.NextDouble() - 0.5) * Max;
-        }
-
-        public void Update()
-        {
         }
 
         public void MouseMoved(MouseEventArgs e)
@@ -172,17 +167,13 @@ namespace Plasma_Fractal
 
         public void MouseClicked(MouseEventArgs e)
         {
+            finishedImage.Save("C:/Users/Pritchy/Desktop/Island.png");
         }
 
         public void Redraw(PaintEventArgs e)
         {
-            for (int i = 0; i < points.GetLength(0); i++)
-            {
-                for (int j = 0; j < points.GetLength(1); j++)
-                {
-                    e.Graphics.FillRectangle(new SolidBrush(points[i, j]), new Rectangle(i, j, 1, 1));
-                }
-            }
+            //Draws 'compiled' Image, starting at 0, 0, of course.
+            e.Graphics.DrawImage(finishedImage, Point.Empty);
         }
     }
 }

@@ -35,10 +35,9 @@
             // 
             this.DrawScreen.AutoScroll = true;
             this.DrawScreen.BackColor = System.Drawing.Color.White;
-            this.DrawScreen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DrawScreen.Location = new System.Drawing.Point(0, 0);
+            this.DrawScreen.Location = new System.Drawing.Point(1, 0);
             this.DrawScreen.Name = "DrawScreen";
-            this.DrawScreen.Size = new System.Drawing.Size(684, 662);
+            this.DrawScreen.Size = new System.Drawing.Size(1000, 1000);
             this.DrawScreen.TabIndex = 0;
             this.DrawScreen.Paint += new System.Windows.Forms.PaintEventHandler(this.Redraw);
             this.DrawScreen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MouseClick);
@@ -49,12 +48,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(684, 662);
+            this.ClientSize = new System.Drawing.Size(984, 812);
             this.Controls.Add(this.DrawScreen);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Screen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "Plasma Fractal Map Genorator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnExit);
             this.Load += new System.EventHandler(this.Screen_Load);
             this.ResumeLayout(false);
@@ -64,6 +63,7 @@
         #endregion
 
         private DBPanel DrawScreen;
+
 
     }
 }

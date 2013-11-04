@@ -14,14 +14,14 @@ namespace Plasma_Fractal
     public partial class Screen : Form
     {
         //Screen size.
-        public static int width = 850;
-        public static int height = 850;
+        public static int width = 4000;
+        public static int height = 4000;
 
         //Thread Variables.
         Boolean Running = false;
         Thread thread = null;
 
-        Manager manager = new Manager();
+        MainState state;
 
         #region Function Explanation
         //Constructor, sets Screen size and then begins Thread.
@@ -29,11 +29,12 @@ namespace Plasma_Fractal
         public Screen()
         {
             InitializeComponent();
-            this.Width = width;
-            this.Height = height;
+            DrawScreen.Width = width;
+            DrawScreen.Height = height;
             //this.TopMost = true;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            state = new MainState(Screen.width, Screen.height, DrawScreen);
             BeginThread();
         }
 
@@ -47,17 +48,17 @@ namespace Plasma_Fractal
 
         private void MouseClick(object sender, MouseEventArgs e)
         {
-            manager.MouseClicked(e);
+            state.MouseClicked(e);
         }
 
         private void MouseMoved(object sender, MouseEventArgs e)
         {
-            manager.MouseMoved(e);
+            state.MouseMoved(e);
         }
 
         private void Redraw(object sender, PaintEventArgs e)
         {
-            manager.Redraw(e);
+            state.Redraw(e);
         }
 
         #region Function Explanation
@@ -89,7 +90,7 @@ namespace Plasma_Fractal
         {
             while (Running)
             {
-                manager.Update();
+                state.Update();
                 
                 //Cause screen to redraw.
                 DrawScreen.Invalidate();
@@ -104,7 +105,7 @@ namespace Plasma_Fractal
         #endregion
         private void Repaint(object sender, PaintEventArgs e)
         {
-            manager.Redraw(e);
+            state.Redraw(e);
         }
 
         private void Screen_Load(object sender, EventArgs e)

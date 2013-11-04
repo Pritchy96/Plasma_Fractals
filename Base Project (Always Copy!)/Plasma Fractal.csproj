@@ -50,7 +50,6 @@
     <Compile Include="DBPanel.Designer.cs">
       <DependentUpon>DBPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Manager.cs" />
     <Compile Include="Screen.cs">
       <SubType>Form</SubType>
     </Compile>
