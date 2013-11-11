@@ -11,7 +11,7 @@ namespace Plasma_Fractal
     class MainState
     {
         int width, height;
-        double roughness = 8;
+        double roughness = 13;
         double screenSize = 0;
         Random rand = new Random();
         DBPanel display;
@@ -81,20 +81,21 @@ namespace Plasma_Fractal
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
                 //places the current pixel we are working with to within the image.
-                finishedImage.SetPixel((int)x, (int)y, GenColour(finalVal * 255));
+                finishedImage.SetPixel((int)x, (int)y, GenColour((int)(finalVal * 255)));
             }
         }
 
-        public Color GenColour (double finalVal)
+        public Color GenColour (int finalVal)
         {
-            //High Mountains
+            //Snow Peak
             if (finalVal < 10)
             {
-                return Color.FromArgb(245,245,245);
+                return Color.FromArgb(245, 245, 245);
             }
+            //High Mountains
             else if (finalVal < 25)
             {
-                return Color.FromArgb(169,169,169);
+                return Color.FromArgb(169, 169, 169);
             }
             //Low Mountains
             else if (finalVal < 50)

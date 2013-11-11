@@ -35,7 +35,7 @@
             // 
             this.DrawScreen.AutoScroll = true;
             this.DrawScreen.BackColor = System.Drawing.Color.White;
-            this.DrawScreen.Location = new System.Drawing.Point(1, 0);
+            this.DrawScreen.Location = new System.Drawing.Point(0, 0);
             this.DrawScreen.Name = "DrawScreen";
             this.DrawScreen.Size = new System.Drawing.Size(1000, 1000);
             this.DrawScreen.TabIndex = 0;
@@ -48,7 +48,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(984, 812);
+            this.ClientSize = new System.Drawing.Size(1001, 829);
             this.Controls.Add(this.DrawScreen);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Screen";

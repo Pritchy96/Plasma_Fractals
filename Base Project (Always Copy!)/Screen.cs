@@ -14,8 +14,8 @@ namespace Plasma_Fractal
     public partial class Screen : Form
     {
         //Screen size.
-        public static int width = 500;
-        public static int height = 500;
+        public static int width = 800;
+        public static int height = 800;
 
         //Thread Variables.
         Boolean Running = false;
