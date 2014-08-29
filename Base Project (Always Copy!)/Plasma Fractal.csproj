@@ -50,6 +50,7 @@
     <Compile Include="DBPanel.Designer.cs">
       <DependentUpon>DBPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="FractalCreator.cs" />
     <Compile Include="Screen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -58,7 +59,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="States\MainState.cs" />
+    <Compile Include="MainState.cs" />
     <EmbeddedResource Include="Screen.resx">
       <DependentUpon>Screen.cs</DependentUpon>
     </EmbeddedResource>
