@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Plasma_Fractal
 {
@@ -13,7 +15,7 @@ namespace Plasma_Fractal
         private static double roughness = 0;    //Increase to create smaller "islands"
         private static double screenSize = 0;   //Width + Height of screen.
 
-        public static Bitmap MakeFractal(int width, int height, int Roughness = 13)
+        public static Bitmap MakeFractal(int width, int height, int Roughness = 13, bool coloured = true)
         {
             screenSize = width + height;
             roughness = Roughness;
@@ -27,12 +29,12 @@ namespace Plasma_Fractal
             double c4 = rand.NextDouble();
 
             //Call Divide, begin the iteration.
-            Divide(bitmap, 0, 0, width, height, c1, c2, c3, c4);
+            Divide(coloured, bitmap, 0, 0, width, height, c1, c2, c3, c4);
 
             return bitmap;
         }
 
-        private static void Divide(Bitmap bitmap, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
+        private static void Divide(bool coloured, Bitmap bitmap, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
             //X and Y are the old c1 coordinates from the last recursive iteration.
 
@@ -58,10 +60,10 @@ namespace Plasma_Fractal
                 mid4 = Round((c3 + c4) / 2);
 
                 //Call divide to calculate the middle of the new rectangles.
-                Divide(bitmap, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
-                Divide(bitmap, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
-                Divide(bitmap, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
-                Divide(bitmap, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
+                Divide(coloured, bitmap, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
+                Divide(coloured, bitmap, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
+                Divide(coloured, bitmap, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
+                Divide(coloured, bitmap, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
             }
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
@@ -69,11 +71,15 @@ namespace Plasma_Fractal
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
-                //places the current pixel we are working with to within the image.
-                bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(finalVal * 255)));
+                if (coloured)
+                    //places the current pixel we are working with to within the image.
+                    bitmap.SetPixel((int)x, (int)y, GenColour((int)(finalVal * 255)));
+                else
+                    //places the current pixel we are working with to within the image.
+                    bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(finalVal * 255)));
             }
         }
-
+  
         private static Color GenColour(int finalVal)
         {
             //Snow Peak
@@ -194,35 +200,37 @@ namespace Plasma_Fractal
 
         private static Color GenColourBWShader(int finalVal)
         {
+            int transparency = 100; //Val between 0 and 255.
+
             //Snow Peak
             if (finalVal < 10)
             {
-                return Color.FromArgb(250, 250, 250);
+                return Color.FromArgb(transparency, 250, 250, 250);
             }
             //High Mountains
             else if (finalVal < 25)
             {
-                return Color.FromArgb(240, 240, 240);
+                return Color.FromArgb(transparency, 240, 240, 240);
             }
             //Low Mountains
             else if (finalVal < 50)
             {
-                return Color.FromArgb(230, 230, 230);
+                return Color.FromArgb(transparency, 230, 230, 230);
             }
             //Dark grass
             else if (finalVal < 70)
             {
-                return Color.FromArgb(220, 220, 220);
+                return Color.FromArgb(transparency, 220, 220, 220);
             }
             //Light Grass
             else if (finalVal < 145)
             {
-                return Color.FromArgb(210, 210, 210);
+                return Color.FromArgb(transparency, 210, 210, 210);
             }
             //Shore 1 - Inner Light Sand
             else if (finalVal < 150)
             {
-                return Color.FromArgb(200, 200, 200);
+                return Color.FromArgb(transparency, 200, 200, 200);
             }
             //Shore 2 - Outer Dark Sand
             // else if (finalVal < 148)
@@ -232,22 +240,22 @@ namespace Plasma_Fractal
             //Shore 3 - Water
             else if (finalVal < 155)
             {
-                return Color.FromArgb(190, 190, 190);
+                return Color.FromArgb(transparency, 190, 190, 190);
             }
             //Reef
             else if (finalVal < 170)
             {
-                return Color.FromArgb(180, 180, 180);
+                return Color.FromArgb(transparency, 180, 180, 180);
             }
             //Sea
             else if (finalVal < 200)
             {
-                return Color.FromArgb(170, 170, 170);
+                return Color.FromArgb(transparency, 170, 170, 170);
             }
             //Deep Sea
             else
             {
-                return Color.FromArgb(160, 160, 160);
+                return Color.FromArgb(transparency, 160, 160, 160);
             }
         }
 

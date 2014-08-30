@@ -34,7 +34,7 @@ namespace Plasma_Fractal
             //this.TopMost = true;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            state = new MainState(800, 800, DrawScreen);
+            state = new MainState(700, 700, DrawScreen);
             BeginThread();
         }
 
