@@ -13,7 +13,6 @@ namespace Plasma_Fractal
     {
         DBPanel display;
         Bitmap islandBaseColour;
-        Bitmap islandShaderOverlay;
         int width, height;
 
         public MainState(int width, int height, DBPanel display)
@@ -26,8 +25,7 @@ namespace Plasma_Fractal
 
         public void MakeIsland()
         {
-            islandBaseColour = FractalCreator.MakeFractal(width, height, 22, true);
-            islandShaderOverlay = FractalCreator.MakeFractal(width, height, 22, false);
+            islandBaseColour = FractalCreator.MakeIsland(width, height, 22);
         }
 
         public void Update()
@@ -59,7 +57,6 @@ namespace Plasma_Fractal
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
             e.Graphics.DrawImage(islandBaseColour, Point.Empty);
-            e.Graphics.DrawImage(islandShaderOverlay, Point.Empty);
         }
     }
 }
