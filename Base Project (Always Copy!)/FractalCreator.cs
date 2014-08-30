@@ -18,7 +18,7 @@ namespace Plasma_Fractal
 
         public static Bitmap MakeIsland(int width, int height, int Roughness = 13)
         {
-            shader = MakeFractal(width, height, Roughness, false);
+            shader = MakeFractal(width, height, 24, false);
 
  
             return MakeFractal(width, height, Roughness, true);
@@ -87,16 +87,20 @@ namespace Plasma_Fractal
                     Color shaderColor = shader.GetPixel((int)x, (int)y);
 
                     Color shadedColour = Color.FromArgb(
-                        (int)(colour.R * ((float)shaderColor.R / (float)255)),
-                        (int)(colour.G * ((float)shaderColor.G / (float)255)),
-                        (int)(colour.B * ((float)shaderColor.B / (float)255)));
+                        Math.Min(255, (int)(colour.R * ((float)shaderColor.R / 255))),
+                        Math.Min(255, (int)(colour.G * ((float)shaderColor.G / 255))),
+                        Math.Min(255, (int)(colour.B * ((float)shaderColor.B / 255))));
 
+                    Color shiftedColour = Color.FromArgb(
+                        Math.Min(255,(shadedColour.R + (int)(((float)shadedColour.R / 255) * rand.Next(-60, 60)))),
+                        Math.Min(255,(shadedColour.G + (int)(((float)shadedColour.G / 255) * rand.Next(-60, 60)))),
+                        Math.Min(255,(shadedColour.B + (int)(((float)shadedColour.B / 255) * rand.Next(-60, 60)))));
 
-                    bitmap.SetPixel((int)x, (int)y, shadedColour);
+                    bitmap.SetPixel((int)x, (int)y, shiftedColour);
                 }
                 else
                     //places the current pixel we are working with to within the image.
-                    bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(finalVal * 255)));
+                    bitmap.SetPixel((int)x, (int)y, GenColourBW((int)(finalVal * 255)));
             }
         }
 
@@ -105,57 +109,57 @@ namespace Plasma_Fractal
             //Snow Peak
             if (finalVal < 10)
             {
-                return Color.FromArgb(189, 196, 190);
+                return Color.FromArgb(174, 181, 175);
             }
             //High Mountains
             else if (finalVal < 25)
             {
-                return Color.FromArgb(139, 121, 120);
+                return Color.FromArgb(149, 131, 130);
             }
             //Low Mountains
             else if (finalVal < 50)
             {
-                return Color.FromArgb(92, 92, 89);
+                return Color.FromArgb(102, 102, 99);
             }
             //Dark grass
             else if (finalVal < 70)
             {
-                return Color.FromArgb(30, 69, 38);
+                return Color.FromArgb(40, 79, 48);
             }
             //Light Grass
             else if (finalVal < 145)
             {
-                return Color.FromArgb(38, 85, 50);
+                return Color.FromArgb(48, 95, 60);
             }
             //Shore 1 - Inner Light Sand
             else if (finalVal < 150)
             {
-                return Color.FromArgb(130, 153, 100);
+                return Color.FromArgb(140, 163, 110);
             }
             //Shore 2 - Outer Dark Sand
             else if (finalVal < 148)
             {
-                return Color.FromArgb(217, 217, 0);
+                return Color.FromArgb(227, 227, 10);
             }
             //Shore 3 - Water
             else if (finalVal < 155)
             {
-                return Color.FromArgb(50, 86, 112);
+                return Color.FromArgb(10, 96, 122);
             }
             //Reef
             else if (finalVal < 170)
             {
-                return Color.FromArgb(28, 61, 85);
+                return Color.FromArgb(38, 71, 95);
             }
             //Sea
             else if (finalVal < 200)
             {
-                return Color.FromArgb(28, 50, 63);
+                return Color.FromArgb(38, 60, 73);
             }
             //Deep Sea
             else
             {
-                return Color.FromArgb(30, 49, 68);
+                return Color.FromArgb(40, 59, 78);
             }
         }
 
@@ -221,63 +225,58 @@ namespace Plasma_Fractal
         private static Color GenColourBW(int finalVal)
         {
             //Snow Peak
-            if (finalVal < 10)
+            if (finalVal < 50)
             {
-                return Color.FromArgb(250, 250, 250);
+                return Color.FromArgb(100, 100, 100);
             }
             //High Mountains
-            else if (finalVal < 25)
+            else if (finalVal < 100)
             {
-                return Color.FromArgb(230, 230, 230);
+                return Color.FromArgb(120, 120, 120);
             }
             //Low Mountains
-            else if (finalVal < 50)
-            {
-                return Color.FromArgb(200, 200, 200);
-            }
-            //Dark grass
-            else if (finalVal < 70)
-            {
-                return Color.FromArgb(170, 170, 170);
-            }
-            //Light Grass
-            else if (finalVal < 145)
-            {
-                return Color.FromArgb(140, 140, 140);
-            }
-            //Shore 1 - Inner Light Sand
             else if (finalVal < 150)
             {
                 return Color.FromArgb(140, 140, 140);
             }
-            //Shore 2 - Outer Dark Sand
-            // else if (finalVal < 148)
-            // {
-            //     return Color.FromArgb(217, 217, 0);
-            //}
-            //Shore 3 - Water
-            else if (finalVal < 155)
-            {
-                return Color.FromArgb(110, 110, 110);
-            }
-            //Reef
-            else if (finalVal < 170)
-            {
-                return Color.FromArgb(80, 80, 80);
-            }
-            //Sea
+            //Dark grass
             else if (finalVal < 200)
             {
-                return Color.FromArgb(50, 50, 50);
+                return Color.FromArgb(160, 160, 160);
+            }
+            //Light Grass
+            else if (finalVal < 250)
+            {
+                return Color.FromArgb(180, 180, 180);
+            }
+            //Shore 1 - Inner Light Sand
+            else if (finalVal < 150)
+            {
+                return Color.FromArgb(200, 200, 200);
+            }
+            //Shore 3 - Water
+            else if (finalVal < 175)
+            {
+                return Color.FromArgb(220, 220, 220);
+            }
+            //Reef
+            else if (finalVal < 200)
+            {
+                return Color.FromArgb(240, 240, 240);
+            }
+            //Sea
+            else if (finalVal < 225)
+            {
+                return Color.FromArgb(240, 240, 240);
             }
             //Deep Sea
             else
             {
-                return Color.FromArgb(20, 20, 20);
+                return Color.FromArgb(250, 250, 250);
             }
         }
 
-        private static Color GenColourBWShader(int finalVal)
+        private static Color GenColourBWTrans(int finalVal)
         {
             int transparency = 100; //Val between 0 and 255.
 

@@ -17,15 +17,15 @@ namespace Plasma_Fractal
 
         public MainState(int width, int height, DBPanel display)
         {
+            this.display = display;
             this.width = width;
             this.height = height;
-            this.display = display;
-            MakeIsland();
+            MakeIsland(width, height);
         }
 
-        public void MakeIsland()
+        public void MakeIsland(int width, int height)
         {
-            islandBaseColour = FractalCreator.MakeIsland(width, height, 22);
+            islandBaseColour = FractalCreator.MakeIsland(width, height, 18);
         }
 
         public void Update()
@@ -49,7 +49,7 @@ namespace Plasma_Fractal
             }
             else
             {
-                MakeIsland();
+                MakeIsland(width, height);
             }
         }
 

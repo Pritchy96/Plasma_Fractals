@@ -53,7 +53,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Screen";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Plasma Fractal Map Genorator";
+            this.Text = "Plasma Fractal Map Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnExit);
             this.Load += new System.EventHandler(this.Screen_Load);
             this.ResumeLayout(false);
