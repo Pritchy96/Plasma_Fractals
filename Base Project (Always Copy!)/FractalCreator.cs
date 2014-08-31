@@ -18,10 +18,10 @@ namespace Plasma_Fractal
         public static Bitmap MakeIsland(int width, int height, int Roughness = 13)
         {
             Bitmap shader = MakeFractal(width, height, 24);
-            ColourBitmapBW(shader, null, false, 255);
+            shader = ColourBitmapBW(shader, null, false, 255);
  
             Bitmap island = MakeFractal(width, height, Roughness);
-            ColourBitmap(island, shader, true, 200);
+            island = ColourBitmap(island, shader, true, 180);
             return island;
         }
 
@@ -88,6 +88,8 @@ namespace Plasma_Fractal
 
         private static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
+            Bitmap colouredMap = new Bitmap(map.Width, map.Height);
+
             for (int i = 0; i < map.Width; i++)
             {
                 for (int j = 0; j < map.Height; j++)
@@ -169,14 +171,16 @@ namespace Plasma_Fractal
                             Math.Min(255, (colour.B + (int)(((float)colour.B / 255) * rand.Next(-60, 60)))));
                     }
 
-                    map.SetPixel((int)i, (int)j, colour);
+                    colouredMap.SetPixel((int)i, (int)j, Color.FromArgb(alpha, colour));
                 }
             }
-            return map;
+            return colouredMap;
         }
 
         private static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
+            Bitmap colouredMap = new Bitmap(map.Width, map.Height);
+            
             for (int i = 0; i < map.Width; i++)
             {
                 for (int j = 0; j < map.Height; j++)
@@ -187,52 +191,52 @@ namespace Plasma_Fractal
                     //Snow Peak
                     if (value < 50)
                     {
-                        colour = Color.FromArgb(100, 100, 100);
+                        colour = Color.FromArgb(alpha, 100, 100, 100);
                     }
                     //High Mountains
                     else if (value < 100)
                     {
-                        colour = Color.FromArgb(120, 120, 120);
+                        colour = Color.FromArgb(alpha, 120, 120, 120);
                     }
                     //Low Mountains
                     else if (value < 150)
                     {
-                        colour = Color.FromArgb(140, 140, 140);
+                        colour = Color.FromArgb(alpha, 140, 140, 140);
                     }
                     //Dark grass
                     else if (value < 200)
                     {
-                        colour = Color.FromArgb(160, 160, 160);
+                        colour = Color.FromArgb(alpha, 160, 160, 160);
                     }
                     //Light Grass
                     else if (value < 250)
                     {
-                        colour = Color.FromArgb(180, 180, 180);
+                        colour = Color.FromArgb(alpha, 180, 180, 180);
                     }
                     //Shore 1 - Inner Light Sand
                     else if (value < 150)
                     {
-                        colour = Color.FromArgb(200, 200, 200);
+                        colour = Color.FromArgb(alpha, 200, 200, 200);
                     }
                     //Shore 3 - Water
                     else if (value < 175)
                     {
-                        colour = Color.FromArgb(220, 220, 220);
+                        colour = Color.FromArgb(alpha, 220, 220, 220);
                     }
                     //Reef
                     else if (value < 200)
                     {
-                        colour = Color.FromArgb(240, 240, 240);
+                        colour = Color.FromArgb(alpha, 240, 240, 240);
                     }
                     //Sea
                     else if (value < 225)
                     {
-                        colour = Color.FromArgb(240, 240, 240);
+                        colour = Color.FromArgb(alpha, 240, 240, 240);
                     }
                     //Deep Sea
                     else
                     {
-                        colour = Color.FromArgb(250, 250, 250);
+                        colour = Color.FromArgb(alpha, 250, 250, 250);
                     }
 
                     if (shaderMap != null)
@@ -253,12 +257,11 @@ namespace Plasma_Fractal
                             Math.Min(255, (colour.B + (int)(((float)colour.B / 255) * rand.Next(-60, 60)))));
                     }
 
-                    map.SetPixel((int)i, (int)j, colour);
+                    colouredMap.SetPixel((int)i, (int)j, colour);
                 }
             }
-            return map;
+            return colouredMap;
         }
-
 
         //Makes sure values stay within limits.
         private static double Round(double num)
