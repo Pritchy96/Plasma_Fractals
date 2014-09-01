@@ -16,7 +16,7 @@ namespace Plasma_Fractal
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Screen());
+            Application.Run(new Island_Display());
         }
     }
 }
