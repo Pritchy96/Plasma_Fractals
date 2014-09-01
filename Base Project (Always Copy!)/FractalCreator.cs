@@ -15,17 +15,9 @@ namespace Plasma_Fractal
         private static double roughness = 0;    //Increase to create smaller "islands"
         private static double screenSize = 0;   //Width + Height of screen.
 
-        public static Bitmap MakeIsland(int width, int height, int Roughness = 13)
-        {
-            Bitmap shader = MakeFractal(width, height, 24);
-            shader = ColourBitmapBW(shader, null, false, 255);
- 
-            Bitmap island = MakeFractal(width, height, Roughness);
-            island = ColourBitmap(island, shader, true, 180);
-            return island;
-        }
 
-        private static Bitmap MakeFractal(int width, int height, int Roughness = 13)
+
+        public static Bitmap MakeFractal(int width, int height, int Roughness = 13)
         {
             screenSize = width + height;
             roughness = Roughness;
@@ -86,7 +78,7 @@ namespace Plasma_Fractal
             }
         }
 
-        private static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map.Width, map.Height);
 
@@ -177,7 +169,7 @@ namespace Plasma_Fractal
             return colouredMap;
         }
 
-        private static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map.Width, map.Height);
             

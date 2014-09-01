@@ -29,8 +29,8 @@ namespace Plasma_Fractal
         public Screen()
         {
             InitializeComponent();
-            DrawScreen.Width = width;
-            DrawScreen.Height = height;
+           // DrawScreen.Width = width;
+          //  DrawScreen.Height = height;
             //this.TopMost = true;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
@@ -112,5 +112,22 @@ namespace Plasma_Fractal
         {
 
         }
+
+        private void btn_Colour_CheckedChanged(object sender, EventArgs e)
+        {
+            state.Colour_CheckedChanged(sender, e);
+        }
+
+        private void splitter1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+
+        }
+
+        private void btnShade_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+
     }
 }
