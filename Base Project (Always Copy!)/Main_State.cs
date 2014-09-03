@@ -11,51 +11,99 @@ namespace Plasma_Fractal
 {
     public class Main_State
     {
-        Bitmap island, colourIsland, shadedIsland, shader;
-        int width, height;
-        bool colour, shade, clouds;
+        Bitmap islandFractal, islandColoured, shader;
+
         Island_Display islandDisplay;
         Options_Menu optionsMenu;
 
         public Main_State(int width, int height, Island_Display islandDisplay)
         {
             this.islandDisplay = islandDisplay;
-            this.width = width;
-            this.height = height;
-            
-            islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
-            Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.   
-            islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
-
-            MakeIsland(width, height);
 
             optionsMenu = new Options_Menu(this); 
             optionsMenu.Show();
+            optionsMenu.TopMost = true;
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
-            optionsMenu.Location = new Point(islandDisplay.Size.Width + 5, 0);
         }
 
-        public void MakeIsland(int width, int height)
+        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true)
         {
+            islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
+            Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
+            islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
+
             //24 is a good setting here for anything under 2000x2000 (ish)
             shader = Fractal_Creator.MakeFractal(width, height, 24);
             shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 255);
 
             //18 is a good setting here for anything under 2000x2000 (ish)
-            island = Fractal_Creator.MakeFractal(width, height, 18);
-            colourIsland = Fractal_Creator.ColourBitmap(island, shader, true, 255);
+            islandFractal = Fractal_Creator.MakeFractal(width, height, 18);
 
-            #region Setting up Clouds
-            shader.RotateFlip(RotateFlipType.Rotate270FlipX);
-            for (int i = 0; i < shader.Width; i++)
-            {
-                for (int j = 0; j < shader.Height; j++)
+            #region Specifying Image parameters (Colour, shade etc)
+                if (coloured)   //Colour the island.
                 {
-                    shader.SetPixel(i, j, Color.FromArgb(100, shader.GetPixel(i, j)));
+                    #region Shade
+                    if (shaded)
+                    {
+                        #region Noise
+                        if (noise)
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, 255);
+                        }
+                        else
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, 255);
+                        }
+                        #endregion
+                    }
+                    else
+                    {
+                        #region Noise
+                        if (noise)
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, 255);
+                        }
+                        else
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, 255);
+                        }
+                        #endregion
+                    }
+                    #endregion
                 }
-            }
+                else   //Keep the island Black and White
+                {
+                    #region Shade
+                    if (shaded)
+                    {
+                        #region Noise
+                        if (noise)
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, 255);
+                        }
+                        else
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, 255);
+                        }
+                        #endregion
+                    }
+                    else
+                    {
+                        #region Noise
+                        if (noise)
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, 255);
+                        }
+                        else
+                        {
+                            islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, 255);
+                        }
+                        #endregion
+                    }
+                    #endregion
+                }
             #endregion
-        }
+        }          
 
         public void Update()
         {
@@ -70,18 +118,40 @@ namespace Plasma_Fractal
         {
             if (e.Button == MouseButtons.Left)
             {
-                //  Bitmap image = new Bitmap();
-
-
-
-                colourIsland.Save("C:/Users/Pritchy/Desktop/Island.png");
+                islandColoured.Save("C:/Users/Pritchy/Desktop/Island.png");
                 MessageBox.Show("Image Saved to Desktop!");
             }
             else
             {
-                MakeIsland(width, height);
+               // MakeIsland(width, height);
             }
         }
+
+        public void ScreenResized()
+        {
+            if (islandDisplay.Bounds.Right + optionsMenu.Width + 5 < Screen.PrimaryScreen.Bounds.Width)
+            {
+                optionsMenu.Location = new Point(islandDisplay.Bounds.Right + 5, islandDisplay.Bounds.Top);
+            }
+            else
+            {
+                optionsMenu.Location = new Point(Screen.PrimaryScreen.Bounds.Right - optionsMenu.Width, islandDisplay.Bounds.Top);
+            }
+
+        }
+
+
+        public void Redraw(PaintEventArgs e)
+        {
+            //Draws 'compiled' Image, starting at 0, 0, of course.
+            e.Graphics.DrawImage(islandColoured, Point.Empty);
+        }
+    }
+}
+
+
+
+/*
 
         public void Colour_CheckedChanged(object sender, EventArgs e)
         {
@@ -101,16 +171,25 @@ namespace Plasma_Fractal
             clouds = cb.Checked;
         }
 
-        public void Redraw(PaintEventArgs e)
+*/
+
+/*
+        public void Colour_CheckedChanged(object sender, EventArgs e)
         {
-            //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(colourIsland, Point.Empty);
-
-            if (clouds)
-            {
-                e.Graphics.DrawImage(shader, Point.Empty);
-            }
+            CheckBox cb = sender as CheckBox;
+            colour = cb.Checked;
         }
-    }
-}
 
+        public void Shade_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+            shade = cb.Checked;
+        }
+
+        public void Clouds_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cb = sender as CheckBox;
+            clouds = cb.Checked;
+        }
+
+*/

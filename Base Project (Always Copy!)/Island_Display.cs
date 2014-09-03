@@ -17,6 +17,7 @@ namespace Plasma_Fractal
         public static int width = 600;
         public static int height = 600;
 
+
         //Thread Variables.
         Boolean Running = false;
         Thread thread = null;
@@ -29,12 +30,9 @@ namespace Plasma_Fractal
         public Island_Display()
         {
             InitializeComponent();
-           // DrawScreen.Width = width;
-          //  DrawScreen.Height = height;
-            //this.TopMost = true;
-            //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            //this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             state = new Main_State(width, height, this);
+            state.MakeIsland(width, height);    //Make an island to start.
+            this.ClientSize = new Size(width, height);  //Set screen size to a default.
             BeginThread();
         }
 
@@ -113,19 +111,14 @@ namespace Plasma_Fractal
 
         }
 
-        private void btn_Colour_CheckedChanged(object sender, EventArgs e)
+        private void Island_Display_Resize(object sender, EventArgs e)
         {
-            state.Colour_CheckedChanged(sender, e);
+            state.ScreenResized();
         }
 
-        private void btnShade_CheckedChanged(object sender, EventArgs e)
+        private void Island_Display_Move(object sender, EventArgs e)
         {
-            state.Shade_CheckedChanged(sender, e);
-        }
-
-        private void btn_Clouds_CheckedChanged(object sender, EventArgs e)
-        {
-            state.Clouds_CheckedChanged(sender, e);
+            state.ScreenResized();
         }
 
 

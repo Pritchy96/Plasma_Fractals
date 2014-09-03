@@ -55,6 +55,8 @@
             this.Text = "Island Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnExit);
             this.Load += new System.EventHandler(this.Screen_Load);
+            this.Move += new System.EventHandler(this.Island_Display_Move);
+            this.Resize += new System.EventHandler(this.Island_Display_Resize);
             this.ResumeLayout(false);
 
         }

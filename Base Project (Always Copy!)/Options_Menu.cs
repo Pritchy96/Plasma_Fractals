@@ -20,19 +20,28 @@ namespace Plasma_Fractal
             this.mainState = mainState;
         }
 
-        private void btn_Clouds_CheckedChanged(object sender, EventArgs e)
+        private void txt_Width_TextChanged(object sender, EventArgs e)
         {
-            mainState.Clouds_CheckedChanged(sender, e);
+            if (chk_Linked.Checked)
+                txt_Height.Text = txt_Width.Text;
         }
 
-        private void btn_Shade_CheckedChanged(object sender, EventArgs e)
+        private void txt_Height_TextChanged(object sender, EventArgs e)
         {
-            mainState.Shade_CheckedChanged(sender, e);
+            if (chk_Linked.Checked)
+                txt_Width.Text = txt_Height.Text;
         }
 
-        private void btn_Colour_CheckedChanged(object sender, EventArgs e)
+        private void btn_Generate_Click(object sender, EventArgs e)
         {
-            mainState.Colour_CheckedChanged(sender, e);
+            try
+            {
+                mainState.MakeIsland(int.Parse(txt_Width.Text), int.Parse(txt_Height.Text), chk_Coloured.Checked, chk_Shaded.Checked, chk_Noise.Checked);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Please enter a Width and Height!");
+            }
         }
     }
 }
