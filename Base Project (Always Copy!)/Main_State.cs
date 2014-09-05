@@ -12,7 +12,6 @@ namespace Plasma_Fractal
     public class Main_State
     {
         Bitmap islandFractal, islandColoured, shader;
-
         Island_Display islandDisplay;
         Options_Menu optionsMenu;
 
@@ -22,7 +21,7 @@ namespace Plasma_Fractal
 
             optionsMenu = new Options_Menu(this); 
             optionsMenu.Show();
-            optionsMenu.TopMost = true;
+            optionsMenu.Owner = islandDisplay;
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
         }
 
@@ -140,7 +139,6 @@ namespace Plasma_Fractal
 
         }
 
-
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
@@ -148,8 +146,6 @@ namespace Plasma_Fractal
         }
     }
 }
-
-
 
 /*
 
