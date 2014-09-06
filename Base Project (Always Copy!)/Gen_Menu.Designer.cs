@@ -1,6 +1,6 @@
 ﻿namespace Plasma_Fractal
 {
-    partial class Options_Menu
+    partial class Gen_Menu
     {
         /// <summary>
         /// Required designer variable.

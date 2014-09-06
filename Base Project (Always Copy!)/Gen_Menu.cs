@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace Plasma_Fractal
 {
-    public partial class Options_Menu : Form
+    public partial class Gen_Menu : Form
     {
         Main_State mainState;
 
-        public Options_Menu(Main_State mainState)
+        public Gen_Menu(Main_State mainState)
         {
             InitializeComponent();
             this.mainState = mainState;

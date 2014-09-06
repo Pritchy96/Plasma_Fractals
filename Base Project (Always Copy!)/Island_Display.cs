@@ -17,7 +17,6 @@ namespace Plasma_Fractal
         public static int width = 600;
         public static int height = 600;
 
-
         //Thread Variables.
         Boolean Running = false;
         Thread thread = null;
@@ -37,26 +36,29 @@ namespace Plasma_Fractal
         }
 
         #region Function Explanation
+        //The main Update loop. Basically just updates Manager which handles
+        //all Game updates.
+        #endregion
+        public void Update()
+        {
+            while (Running)
+            {
+                state.Update();
+
+                //Cause screen to redraw.
+                DrawScreen.Invalidate();
+
+                //Basic Thread Slowing.
+                Thread.Sleep(12);
+            }
+        }
+
+        #region Function Explanation
         //Exit Event, kills Thread on Window close.
         #endregion
         private void OnExit(object sender, FormClosingEventArgs e)
         {
             killThread();
-        }
-
-        private void MouseClick(object sender, MouseEventArgs e)
-        {
-            state.MouseClicked(e);
-        }
-
-        private void MouseMoved(object sender, MouseEventArgs e)
-        {
-            state.MouseMoved(e);
-        }
-
-        private void Redraw(object sender, PaintEventArgs e)
-        {
-            state.Redraw(e);
         }
 
         #region Function Explanation
@@ -80,35 +82,14 @@ namespace Plasma_Fractal
             thread.Join();
         }
 
-        #region Function Explanation
-        //The main Update loop. Basically just updates Manager which handles
-        //all Game updates.
-        #endregion
-        public void Update()
+        private void MouseClick(object sender, MouseEventArgs e)
         {
-            while (Running)
-            {
-                state.Update();
-                
-                //Cause screen to redraw.
-                DrawScreen.Invalidate();
-
-                //Basic Thread Slowing.
-                Thread.Sleep(12);
-            }
+            state.MouseClicked(e);
         }
 
-        #region Function Explanation
-        //Repaints Manager.
-        #endregion
-        private void Repaint(object sender, PaintEventArgs e)
+        private void MouseMoved(object sender, MouseEventArgs e)
         {
-            state.Redraw(e);
-        }
-
-        private void Screen_Load(object sender, EventArgs e)
-        {
-
+            state.MouseMoved(e);
         }
 
         private void Island_Display_Resize(object sender, EventArgs e)
@@ -121,6 +102,12 @@ namespace Plasma_Fractal
             state.ScreenResized();
         }
 
-
+        #region Function Explanation
+        //Repaints Manager.
+        #endregion
+        private void Repaint(object sender, PaintEventArgs e)
+        {
+            state.Redraw(e);
+        }
     }
 }

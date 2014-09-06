@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,7 +22,7 @@ namespace Plasma_Fractal
             roughness = Roughness;
 
             Bitmap bitmap = new Bitmap(width, height);
-            
+
             //Calculate corner values (c1, c2, c3, c4).
             double c1 = rand.NextDouble();
             double c2 = rand.NextDouble();
@@ -60,10 +61,10 @@ namespace Plasma_Fractal
                 mid4 = Round((c3 + c4) / 2);
 
                 //Call divide to calculate the middle of the new rectangles.
-                Divide( bitmap, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
-                Divide( bitmap, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
-                Divide( bitmap, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
-                Divide( bitmap, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
+                Divide(bitmap, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
+                Divide(bitmap, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
+                Divide(bitmap, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
+                Divide(bitmap, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
             }
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
@@ -72,184 +73,278 @@ namespace Plasma_Fractal
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
                 //places the current pixel we are working with within the image.
-                 bitmap.SetPixel((int)x, (int)y, Color.FromArgb((int)(finalVal * 255), (int) (finalVal * 255),(int) (finalVal * 255)));
+                bitmap.SetPixel((int)x, (int)y, Color.FromArgb((int)(finalVal * 255), (int)(finalVal * 255), (int)(finalVal * 255)));
             }
-        }
-
-        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
-        {
-            Bitmap colouredMap = new Bitmap(map.Width, map.Height);
-
-            for (int i = 0; i < map.Width; i++)
-            {
-                for (int j = 0; j < map.Height; j++)
-                {
-                    int value = map.GetPixel(i, j).R;    //Could also be B or G, it's grey so all equal
-                    Color colour;
-
-                    //Snow Peak
-                    if (value < 10)
-                    {
-                        colour = Color.FromArgb(174, 181, 175);
-                    }
-                    //High Mountains
-                    else if (value < 25)
-                    {
-                        colour = Color.FromArgb(149, 131, 130);
-                    }
-                    //Low Mountains
-                    else if (value < 50)
-                    {
-                        colour = Color.FromArgb(102, 102, 99);
-                    }
-                    //Dark grass
-                    else if (value < 70)
-                    {
-                        colour = Color.FromArgb(40, 79, 48);
-                    }
-                    //Light Grass
-                    else if (value < 145)
-                    {
-                        colour = Color.FromArgb(48, 95, 60);
-                    }
-                    //Shore 1 - Inner Light Sand
-                    else if (value < 150)
-                    {
-                        colour = Color.FromArgb(140, 163, 110);
-                    }
-                    //Shore 2 - Outer Dark Sand
-                    else if (value < 148)
-                    {
-                        colour = Color.FromArgb(227, 227, 10);
-                    }
-                    //Shore 3 - Water
-                    else if (value < 155)
-                    {
-                        colour = Color.FromArgb(10, 96, 122);
-                    }
-                    //Reef
-                    else if (value < 170)
-                    {
-                        colour = Color.FromArgb(38, 71, 95);
-                    }
-                    //Sea
-                    else if (value < 200)
-                    {
-                        colour = Color.FromArgb(38, 60, 73);
-                    }
-                    //Deep Sea
-                    else
-                    {
-                        colour = Color.FromArgb(40, 59, 78);
-                    }
-
-                    if (shaderMap != null)
-                    {
-                    Color shaderColor = shaderMap.GetPixel((int)i, (int)j);
-
-                        colour = Color.FromArgb(
-                            Math.Min(255, (int)(colour.R * ((float)shaderColor.R / 255))),
-                            Math.Min(255, (int)(colour.G * ((float)shaderColor.G / 255))),
-                            Math.Min(255, (int)(colour.B * ((float)shaderColor.B / 255))));
-                    }
-
-                    if (noise)
-                    {
-                        colour = Color.FromArgb(
-                            Math.Min(255, (colour.R + (int)(((float)colour.R / 255) * rand.Next(-60, 60)))),
-                            Math.Min(255, (colour.G + (int)(((float)colour.G / 255) * rand.Next(-60, 60)))),
-                            Math.Min(255, (colour.B + (int)(((float)colour.B / 255) * rand.Next(-60, 60)))));
-                    }
-
-                    colouredMap.SetPixel((int)i, (int)j, Color.FromArgb(alpha, colour));
-                }
-            }
-            return colouredMap;
         }
 
         public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
-            Bitmap colouredMap = new Bitmap(map.Width, map.Height);
-            
-            for (int i = 0; i < map.Width; i++)
+            Bitmap colouredMap = new Bitmap(map);
+
+            #region Reading Main Map Bitmap.
+            //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
+
+            System.Drawing.Imaging.BitmapData mapBmpData = colouredMap.LockBits(rect,
+                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            // Get the address of the first line.
+            IntPtr mapPtr = mapBmpData.Scan0;
+
+            // Declare an array to hold the shaderBytes of the bitmap. 
+            int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
+            byte[] MapRgbValues = new byte[mapBytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, MapRgbValues, 0, mapBytes);
+            #endregion
+
+            #region Reading Shader Bitmap, if needed.
+            byte[] shaderRgbValues = null;
+
+            if (shaderMap != null)
             {
-                for (int j = 0; j < map.Height; j++)
-                {
-                    int value = map.GetPixel(i, j).R;    //Could also be B or G, it's grey so all equal
-                    Color colour;
+                System.Drawing.Imaging.BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
-                    //Snow Peak
-                    if (value < 50)
-                    {
-                        colour = Color.FromArgb(alpha, 100, 100, 100);
-                    }
-                    //High Mountains
-                    else if (value < 100)
-                    {
-                        colour = Color.FromArgb(alpha, 120, 120, 120);
-                    }
-                    //Low Mountains
-                    else if (value < 150)
-                    {
-                        colour = Color.FromArgb(alpha, 140, 140, 140);
-                    }
-                    //Dark grass
-                    else if (value < 200)
-                    {
-                        colour = Color.FromArgb(alpha, 160, 160, 160);
-                    }
-                    //Light Grass
-                    else if (value < 250)
-                    {
-                        colour = Color.FromArgb(alpha, 180, 180, 180);
-                    }
-                    //Shore 1 - Inner Light Sand
-                    else if (value < 150)
-                    {
-                        colour = Color.FromArgb(alpha, 200, 200, 200);
-                    }
-                    //Shore 3 - Water
-                    else if (value < 175)
-                    {
-                        colour = Color.FromArgb(alpha, 220, 220, 220);
-                    }
-                    //Reef
-                    else if (value < 200)
-                    {
-                        colour = Color.FromArgb(alpha, 240, 240, 240);
-                    }
-                    //Sea
-                    else if (value < 225)
-                    {
-                        colour = Color.FromArgb(alpha, 240, 240, 240);
-                    }
-                    //Deep Sea
-                    else
-                    {
-                        colour = Color.FromArgb(alpha, 250, 250, 250);
-                    }
+                // Get the address of the first line.
+                IntPtr shaderPtr = shaderBmpData.Scan0;
 
-                    if (shaderMap != null)
-                    {
-                        Color shaderColor = shaderMap.GetPixel((int)i, (int)j);
+                // Declare an array to hold the shaderBytes of the bitmap. 
+                int shaderBytes = Math.Abs(shaderBmpData.Stride) * colouredMap.Height;
+                shaderRgbValues = new byte[shaderBytes];
 
-                        colour = Color.FromArgb(
-                            Math.Min(255, (int)(colour.R * ((float)shaderColor.R / 255))),
-                            Math.Min(255, (int)(colour.G * ((float)shaderColor.G / 255))),
-                            Math.Min(255, (int)(colour.B * ((float)shaderColor.B / 255))));
-                    }
-
-                    if (noise)
-                    {
-                        colour = Color.FromArgb(
-                            Math.Min(255, (colour.R + (int)(((float)colour.R / 255) * rand.Next(-60, 60)))),
-                            Math.Min(255, (colour.G + (int)(((float)colour.G / 255) * rand.Next(-60, 60)))),
-                            Math.Min(255, (colour.B + (int)(((float)colour.B / 255) * rand.Next(-60, 60)))));
-                    }
-
-                    colouredMap.SetPixel((int)i, (int)j, colour);
-                }
+                // Copy the RGB values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
             }
+            #endregion
+         
+            #region Colour Selecting.
+            //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
+            for (int i = 0; i < MapRgbValues.Length; i += 3)
+            {
+                if (MapRgbValues[i] < 50)
+                {
+                    MapRgbValues[i] = 100;
+                }
+                else if (MapRgbValues[i] < 100)
+                {
+                    MapRgbValues[i] = 120;
+                }
+                else if (MapRgbValues[i] < 150)
+                {
+                    MapRgbValues[i] = 140;
+                }
+                else if (MapRgbValues[i] < 200)
+                {
+                    MapRgbValues[i] = 160;
+                }
+                else if (MapRgbValues[i] < 250)
+                {
+                    MapRgbValues[i] = 180;
+                }
+                else if (MapRgbValues[i] < 150)
+                {
+                    MapRgbValues[i] = 200;
+                }
+                else if (MapRgbValues[i] < 175)
+                {
+                    MapRgbValues[i] = 220;
+                }
+                else if (MapRgbValues[i] < 200)
+                {
+                    MapRgbValues[i] = 240;
+                }
+                else if (MapRgbValues[i] < 225)
+                {
+                    MapRgbValues[i] = 240;
+                }
+                else
+                {
+                    MapRgbValues[i] = 250;
+                }
+
+                #region Shading.
+                if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
+                {
+                    MapRgbValues[i] = (byte)Math.Min(255, (int)(MapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
+                    MapRgbValues[i + 1] = (byte)Math.Min(255, (int)(MapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
+                    MapRgbValues[i + 2] = (byte)Math.Min(255, (int)(MapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                }
+                #endregion
+
+                #region Noise Adding.
+                if (noise)  //Displacing the pixel colour by a random amount.
+                {
+                    MapRgbValues[i] = (byte)Math.Min(255, (MapRgbValues[i] + (int)(((float)MapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    MapRgbValues[i + 1] = (byte)Math.Min(255, (MapRgbValues[i + 1] + (int)(((float)MapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    MapRgbValues[i + 2] = (byte)Math.Min(255, (MapRgbValues[i + 2] + (int)(((float)MapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                }
+                #endregion
+            
+            }
+            #endregion
+
+            // Copy the RGB values back to the bitmap
+            System.Runtime.InteropServices.Marshal.Copy(MapRgbValues, 0, mapPtr, mapBytes);
+
+            // Unlock the bits.
+            colouredMap.UnlockBits(mapBmpData);
+            return colouredMap;
+        }
+
+        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        {
+            Bitmap colouredMap = new Bitmap(map);
+
+            #region Reading Main Map Bitmap.
+            //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
+
+            System.Drawing.Imaging.BitmapData mapBmpData = colouredMap.LockBits(rect,
+                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            // Get the address of the first line.
+            IntPtr mapPtr = mapBmpData.Scan0;
+
+            // Declare an array to hold the shaderBytes of the bitmap. 
+            int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
+            byte[] MapRgbValues = new byte[mapBytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, MapRgbValues, 0, mapBytes);
+            #endregion
+
+            #region Reading Shader Bitmap, if needed.
+            byte[] shaderRgbValues = null;
+
+            if (shaderMap != null)
+            {
+                System.Drawing.Imaging.BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                // Get the address of the first line.
+                IntPtr shaderPtr = shaderBmpData.Scan0;
+
+                // Declare an array to hold the shaderBytes of the bitmap. 
+                int shaderBytes = Math.Abs(shaderBmpData.Stride) * colouredMap.Height;
+                shaderRgbValues = new byte[shaderBytes];
+
+                // Copy the RGB values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
+            }
+            #endregion
+
+            #region Colour Selecting.
+            //Is in the format BGR, NOT RGB!!!
+            for (int i = 0; i < MapRgbValues.Length; i += 3)
+            {
+                //Snow Peak
+                if (MapRgbValues[i] < 10)
+                {
+                    MapRgbValues[i] = 175;    //Blue component
+                    MapRgbValues[i + 1] = 181;   //Green Component
+                    MapRgbValues[i + 2] = 174;   //Red Component
+                }
+                //High Mountains
+                else if (MapRgbValues[i] < 25)
+                {
+                    MapRgbValues[i] = 130;
+                    MapRgbValues[i + 1] = 131;
+                    MapRgbValues[i + 2] = 149;
+                }
+                //Low Mountains
+                else if (MapRgbValues[i] < 50)
+                {
+                    MapRgbValues[i] = 99;
+                    MapRgbValues[i + 1] = 102;
+                    MapRgbValues[i + 2] = 102;
+                }
+
+                //Dark grass
+                else if (MapRgbValues[i] < 70)
+                {
+                    MapRgbValues[i] = 48;
+                    MapRgbValues[i + 1] = 79;
+                    MapRgbValues[i + 2] = 40;
+                }
+                //Light Grass
+                else if (MapRgbValues[i] < 145)
+                {
+                    MapRgbValues[i] = 60;
+                    MapRgbValues[i + 1] = 95;
+                    MapRgbValues[i + 2] = 48;
+                }
+                //Shore 1 - Inner Light Sand
+                else if (MapRgbValues[i] < 150)
+                {
+                    MapRgbValues[i] = 110;
+                    MapRgbValues[i + 1] = 163;
+                    MapRgbValues[i + 2] = 140;
+                }
+                //Shore 2 - Outer Dark Sand
+                else if (MapRgbValues[i] < 148)
+                {
+                    MapRgbValues[i] = 227;
+                    MapRgbValues[i + 1] = 227;
+                    MapRgbValues[i + 2] = 10;
+                }
+                //Shore 3 - Water
+                else if (MapRgbValues[i] < 155)
+                {
+                    MapRgbValues[i] = 122;
+                    MapRgbValues[i + 1] = 96;
+                    MapRgbValues[i + 2] = 10;
+                }
+                //Reef
+                else if (MapRgbValues[i] < 170)
+                {
+                    MapRgbValues[i] = 95;
+                    MapRgbValues[i + 1] = 71;
+                    MapRgbValues[i + 2] = 38;
+                }
+                //Sea
+                else if (MapRgbValues[i] < 200)
+                {
+                    MapRgbValues[i] = 73;
+                    MapRgbValues[i + 1] = 60;
+                    MapRgbValues[i + 2] = 38;
+                }
+                //Deep Sea
+                else
+                {
+                    MapRgbValues[i] = 78;
+                    MapRgbValues[i + 1] = 59;
+                    MapRgbValues[i + 2] = 40;
+                }
+
+                #region Shading.
+                if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
+                {
+                    MapRgbValues[i] = (byte)Math.Min(255, (int)(MapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
+                    MapRgbValues[i + 1] = (byte)Math.Min(255, (int)(MapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
+                    MapRgbValues[i + 2] = (byte)Math.Min(255, (int)(MapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                }
+                #endregion
+
+                #region Noise Adding.
+                if (noise)  //Displacing the pixel colour by a random amount.
+                {
+                    MapRgbValues[i] = (byte)Math.Min(255, (MapRgbValues[i] + (int)(((float)MapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    MapRgbValues[i + 1] = (byte)Math.Min(255, (MapRgbValues[i + 1] + (int)(((float)MapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    MapRgbValues[i + 2] = (byte)Math.Min(255, (MapRgbValues[i + 2] + (int)(((float)MapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                }
+                #endregion
+            }
+            #endregion
+
+            // Copy the RGB values back to the bitmap
+            System.Runtime.InteropServices.Marshal.Copy(MapRgbValues, 0, mapPtr, mapBytes);
+
+            // Unlock the bits.
+            colouredMap.UnlockBits(mapBmpData);
             return colouredMap;
         }
 
@@ -320,34 +415,6 @@ namespace Plasma_Fractal
                     bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(finalVal * 255)));
             }
         }*/
-
-
-/*
-
-                if (coloured)
-                {
-                    //places the current pixel we are working with to within the image.
-                    Color colour = GenColour((int)(finalVal * 255));
-                    Color shaderColor = shader.GetPixel((int)x, (int)y);
-
-                    Color shadedColour = Color.FromArgb(
-                        Math.Min(255, (int)(colour.R * ((float)shaderColor.R / 255))),
-                        Math.Min(255, (int)(colour.G * ((float)shaderColor.G / 255))),
-                        Math.Min(255, (int)(colour.B * ((float)shaderColor.B / 255))));
-
-                    Color shiftedColour = Color.FromArgb(
-                        Math.Min(255,(shadedColour.R + (int)(((float)shadedColour.R / 255) * rand.Next(-60, 60)))),
-                        Math.Min(255,(shadedColour.G + (int)(((float)shadedColour.G / 255) * rand.Next(-60, 60)))),
-                        Math.Min(255,(shadedColour.B + (int)(((float)shadedColour.B / 255) * rand.Next(-60, 60)))));
-
-                    bitmap.SetPixel((int)x, (int)y, shiftedColour);
-                }
-                else
-                    //places the current pixel we are working with to within the image.
-                    bitmap.SetPixel((int)x, (int)y, GenColourBW((int)(finalVal * 255)));
-
-*/
-
 
 /*
         private static Color GenColourBWTrans(int value)
@@ -469,3 +536,96 @@ namespace Plasma_Fractal
                 return Color.FromArgb(0, 105, 140);
             }
         }#*/
+
+/*
+        public static Bitmap ColourBitmapOld(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        {
+            Bitmap colouredMap = new Bitmap(map.Width, map.Height);
+
+            for (int i = 0; i < map.Width; i++)
+            {
+                for (int j = 0; j < map.Height; j++)
+                {
+                    int value = map.GetPixel(i, j).R;    //Could also be B or G, it's grey so all equal
+                    Color colour;
+
+                    //Snow Peak
+                    if (value < 10)
+                    {
+                        colour = Color.FromArgb(174, 181, 175);
+                    }
+                    //High Mountains
+                    else if (value < 25)
+                    {
+                        colour = Color.FromArgb(149, 131, 130);
+                    }
+                    //Low Mountains
+                    else if (value < 50)
+                    {
+                        colour = Color.FromArgb(102, 102, 99);
+                    }
+                    //Dark grass
+                    else if (value < 70)
+                    {
+                        colour = Color.FromArgb(40, 79, 48);
+                    }
+                    //Light Grass
+                    else if (value < 145)
+                    {
+                        colour = Color.FromArgb(48, 95, 60);
+                    }
+                    //Shore 1 - Inner Light Sand
+                    else if (value < 150)
+                    {
+                        colour = Color.FromArgb(140, 163, 110);
+                    }
+                    //Shore 2 - Outer Dark Sand
+                    else if (value < 148)
+                    {
+                        colour = Color.FromArgb(227, 227, 10);
+                    }
+                    //Shore 3 - Water
+                    else if (value < 155)
+                    {
+                        colour = Color.FromArgb(10, 96, 122);
+                    }
+                    //Reef
+                    else if (value < 170)
+                    {
+                        colour = Color.FromArgb(38, 71, 95);
+                    }
+                    //Sea
+                    else if (value < 200)
+                    {
+                        colour = Color.FromArgb(38, 60, 73);
+                    }
+                    //Deep Sea
+                    else
+                    {
+                        colour = Color.FromArgb(40, 59, 78);
+                    }
+
+                    if (shaderMap != null)
+                    {
+                        Color shaderColor = shaderMap.GetPixel((int)i, (int)j);
+
+                        colour = Color.FromArgb(
+                            Math.Min(255, (int)(colour.R * ((float)shaderColor.R / 255))),
+                            Math.Min(255, (int)(colour.G * ((float)shaderColor.G / 255))),
+                            Math.Min(255, (int)(colour.B * ((float)shaderColor.B / 255))));
+                    }
+
+                    if (noise)
+                    {
+                        colour = Color.FromArgb(
+                            Math.Min(255, (colour.R + (int)(((float)colour.R / 255) * rand.Next(-60, 60)))),
+                            Math.Min(255, (colour.G + (int)(((float)colour.G / 255) * rand.Next(-60, 60)))),
+                            Math.Min(255, (colour.B + (int)(((float)colour.B / 255) * rand.Next(-60, 60)))));
+                    }
+
+                    colouredMap.SetPixel((int)i, (int)j, Color.FromArgb(alpha, colour));
+                }
+            }
+            return colouredMap;
+        }
+*/

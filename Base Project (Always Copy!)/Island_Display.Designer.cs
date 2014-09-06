@@ -39,7 +39,7 @@
             this.DrawScreen.Name = "DrawScreen";
             this.DrawScreen.Size = new System.Drawing.Size(613, 456);
             this.DrawScreen.TabIndex = 0;
-            this.DrawScreen.Paint += new System.Windows.Forms.PaintEventHandler(this.Redraw);
+            this.DrawScreen.Paint += new System.Windows.Forms.PaintEventHandler(this.Repaint);
             this.DrawScreen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MouseClick);
             this.DrawScreen.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMoved);
             // 
@@ -54,7 +54,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Island Generator";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnExit);
-            this.Load += new System.EventHandler(this.Screen_Load);
             this.Move += new System.EventHandler(this.Island_Display_Move);
             this.Resize += new System.EventHandler(this.Island_Display_Resize);
             this.ResumeLayout(false);

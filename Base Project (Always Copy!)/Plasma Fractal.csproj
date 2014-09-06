@@ -51,11 +51,11 @@
       <DependentUpon>DBPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Fractal_Creator.cs" />
-    <Compile Include="Options_Menu.cs">
+    <Compile Include="Gen_Menu.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Options_Menu.Designer.cs">
-      <DependentUpon>Options_Menu.cs</DependentUpon>
+    <Compile Include="Gen_Menu.Designer.cs">
+      <DependentUpon>Gen_Menu.cs</DependentUpon>
     </Compile>
     <Compile Include="Island_Display.cs">
       <SubType>Form</SubType>
@@ -66,8 +66,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main_State.cs" />
-    <EmbeddedResource Include="Options_Menu.resx">
-      <DependentUpon>Options_Menu.cs</DependentUpon>
+    <EmbeddedResource Include="Gen_Menu.resx">
+      <DependentUpon>Gen_Menu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Island_Display.resx">
       <DependentUpon>Island_Display.cs</DependentUpon>

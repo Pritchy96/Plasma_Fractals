@@ -13,13 +13,13 @@ namespace Plasma_Fractal
     {
         Bitmap islandFractal, islandColoured, shader;
         Island_Display islandDisplay;
-        Options_Menu optionsMenu;
+        Gen_Menu optionsMenu;
 
         public Main_State(int width, int height, Island_Display islandDisplay)
         {
             this.islandDisplay = islandDisplay;
 
-            optionsMenu = new Options_Menu(this); 
+            optionsMenu = new Gen_Menu(this); 
             optionsMenu.Show();
             optionsMenu.Owner = islandDisplay;
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
