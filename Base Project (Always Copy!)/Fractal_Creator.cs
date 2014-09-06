@@ -35,7 +35,7 @@ namespace Plasma_Fractal
             int mapBytes = Math.Abs(mapBmpData.Stride) * bitmap.Height;
             byte[] mapRgbValues = new byte[mapBytes];
 
-            // Copy the RGB values into the array. This array just holds the RGB values of each pixel in the format
+            // Copy the RGB values into the array. This array just holds the RGB (BGR) values of each pixel in the format
             // B, G, R, B, G, R, B, G, R and so on.
             System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
 
@@ -56,6 +56,18 @@ namespace Plasma_Fractal
             return bitmap;
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="mapRgbValues"> Array of BGR Bytes </param>
+        /// <param name="bitmapWidth"> Width of the bitmap image </param>
+        /// <param name="x"> X Pos </param>
+        /// <param name="y"> Y Pos </param>
+        /// <param name="width"> Width of current rectangle being worked on. </param>
+        /// <param name="height"> Height of current rectangle being worked on. </param>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <param name="c3"></param>
+        /// <param name="c4"></param>
         private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
             //X and Y are the old c1 coordinates from the last recursive iteration.
@@ -93,9 +105,10 @@ namespace Plasma_Fractal
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
+                //Calculate where the position of the blue (remember BGR not RGB) byte for the pixel at positon (X, Y) on the bitmap image is in the 1D byte array.
                 int bytePosition = ((int) (((int)y * bitmapWidth) + (int)x) * 3);
 
-                //Only needs to colour one of the RGB values as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
+                //Only needs to set one of the RGB values in the byte array as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
                 mapRgbValues[bytePosition] = (byte) (finalVal * 255);
             }
         }
