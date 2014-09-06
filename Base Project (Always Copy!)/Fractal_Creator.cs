@@ -23,6 +23,22 @@ namespace Plasma_Fractal
 
             Bitmap bitmap = new Bitmap(width, height);
 
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+
+            BitmapData mapBmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            // Get the address of the first line.
+            IntPtr mapPtr = mapBmpData.Scan0;
+
+            // Declare an array to hold the shaderBytes of the bitmap. 
+            int mapBytes = Math.Abs(mapBmpData.Stride) * bitmap.Height;
+            byte[] mapRgbValues = new byte[mapBytes];
+
+            // Copy the RGB values into the array. This array just holds the RGB values of each pixel in the format
+            // B, G, R, B, G, R, B, G, R and so on.
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
+
             //Calculate corner values (c1, c2, c3, c4).
             double c1 = rand.NextDouble();
             double c2 = rand.NextDouble();
@@ -30,12 +46,17 @@ namespace Plasma_Fractal
             double c4 = rand.NextDouble();
 
             //Call Divide, begin the iteration.
-            Divide(bitmap, 0, 0, width, height, c1, c2, c3, c4);
+            Divide(mapRgbValues, width, 0, 0, width, height, c1, c2, c3, c4);
 
+            // Copy the RGB values back to the bitmap
+            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
+
+            // Unlock the bits and return.
+            bitmap.UnlockBits(mapBmpData);
             return bitmap;
         }
 
-        private static void Divide(Bitmap bitmap, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
+        private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
         {
             //X and Y are the old c1 coordinates from the last recursive iteration.
 
@@ -61,10 +82,10 @@ namespace Plasma_Fractal
                 mid4 = Round((c3 + c4) / 2);
 
                 //Call divide to calculate the middle of the new rectangles.
-                Divide(bitmap, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
-                Divide(bitmap, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
-                Divide(bitmap, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
-                Divide(bitmap, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
+                Divide(mapRgbValues, bitmapWidth, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
+                Divide(mapRgbValues, bitmapWidth, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
+                Divide(mapRgbValues, bitmapWidth, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
+                Divide(mapRgbValues, bitmapWidth, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
             }
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
@@ -72,8 +93,10 @@ namespace Plasma_Fractal
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
                 double finalVal = (c1 + c2 + c3 + c4) / 4;
 
-                //places the current pixel we are working with within the image.
-                bitmap.SetPixel((int)x, (int)y, Color.FromArgb((int)(finalVal * 255), (int)(finalVal * 255), (int)(finalVal * 255)));
+                int bytePosition = ((int) (((int)y * bitmapWidth) + (int)x) * 3);
+
+                //Only needs to colour one of the RGB values as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
+                mapRgbValues[bytePosition] = (byte) (finalVal * 255);
             }
         }
 
@@ -86,18 +109,18 @@ namespace Plasma_Fractal
             // Lock the bitmap's bits.  
             Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
 
-            System.Drawing.Imaging.BitmapData mapBmpData = colouredMap.LockBits(rect,
-                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            BitmapData mapBmpData = colouredMap.LockBits(rect,
+                ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             // Get the address of the first line.
             IntPtr mapPtr = mapBmpData.Scan0;
 
             // Declare an array to hold the shaderBytes of the bitmap. 
             int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
-            byte[] MapRgbValues = new byte[mapBytes];
+            byte[] mapRgbValues = new byte[mapBytes];
 
             // Copy the RGB values into the array.
-            System.Runtime.InteropServices.Marshal.Copy(mapPtr, MapRgbValues, 0, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
             #endregion
 
             #region Reading Shader Bitmap, if needed.
@@ -105,8 +128,8 @@ namespace Plasma_Fractal
 
             if (shaderMap != null)
             {
-                System.Drawing.Imaging.BitmapData shaderBmpData = shaderMap.LockBits(rect,
-                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
                 // Get the address of the first line.
                 IntPtr shaderPtr = shaderBmpData.Scan0;
@@ -119,77 +142,77 @@ namespace Plasma_Fractal
                 System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
             }
             #endregion
-         
+
             #region Colour Selecting.
             //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
-            for (int i = 0; i < MapRgbValues.Length; i += 3)
+            for (int i = 0; i < mapRgbValues.Length; i += 3)
             {
-                if (MapRgbValues[i] < 50)
+                if (mapRgbValues[i] < 50)
                 {
-                    MapRgbValues[i] = 100;
+                    mapRgbValues[i] = 100;
                 }
-                else if (MapRgbValues[i] < 100)
+                else if (mapRgbValues[i] < 100)
                 {
-                    MapRgbValues[i] = 120;
+                    mapRgbValues[i] = 120;
                 }
-                else if (MapRgbValues[i] < 150)
+                else if (mapRgbValues[i] < 150)
                 {
-                    MapRgbValues[i] = 140;
+                    mapRgbValues[i] = 140;
                 }
-                else if (MapRgbValues[i] < 200)
+                else if (mapRgbValues[i] < 200)
                 {
-                    MapRgbValues[i] = 160;
+                    mapRgbValues[i] = 160;
                 }
-                else if (MapRgbValues[i] < 250)
+                else if (mapRgbValues[i] < 250)
                 {
-                    MapRgbValues[i] = 180;
+                    mapRgbValues[i] = 180;
                 }
-                else if (MapRgbValues[i] < 150)
+                else if (mapRgbValues[i] < 150)
                 {
-                    MapRgbValues[i] = 200;
+                    mapRgbValues[i] = 200;
                 }
-                else if (MapRgbValues[i] < 175)
+                else if (mapRgbValues[i] < 175)
                 {
-                    MapRgbValues[i] = 220;
+                    mapRgbValues[i] = 220;
                 }
-                else if (MapRgbValues[i] < 200)
+                else if (mapRgbValues[i] < 200)
                 {
-                    MapRgbValues[i] = 240;
+                    mapRgbValues[i] = 240;
                 }
-                else if (MapRgbValues[i] < 225)
+                else if (mapRgbValues[i] < 225)
                 {
-                    MapRgbValues[i] = 240;
+                    mapRgbValues[i] = 240;
                 }
                 else
                 {
-                    MapRgbValues[i] = 250;
+                    mapRgbValues[i] = 250;
                 }
 
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
-                    MapRgbValues[i] = (byte)Math.Min(255, (int)(MapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
-                    MapRgbValues[i + 1] = (byte)Math.Min(255, (int)(MapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
-                    MapRgbValues[i + 2] = (byte)Math.Min(255, (int)(MapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
                 }
                 #endregion
 
                 #region Noise Adding.
                 if (noise)  //Displacing the pixel colour by a random amount.
                 {
-                    MapRgbValues[i] = (byte)Math.Min(255, (MapRgbValues[i] + (int)(((float)MapRgbValues[i] / 255) * rand.Next(-60, 60))));
-                    MapRgbValues[i + 1] = (byte)Math.Min(255, (MapRgbValues[i + 1] + (int)(((float)MapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
-                    MapRgbValues[i + 2] = (byte)Math.Min(255, (MapRgbValues[i + 2] + (int)(((float)MapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
                 }
                 #endregion
-            
+
             }
             #endregion
 
             // Copy the RGB values back to the bitmap
-            System.Runtime.InteropServices.Marshal.Copy(MapRgbValues, 0, mapPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
 
-            // Unlock the bits.
+            // Unlock the bits and return.
             colouredMap.UnlockBits(mapBmpData);
             return colouredMap;
         }
@@ -203,18 +226,17 @@ namespace Plasma_Fractal
             // Lock the bitmap's bits.  
             Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
 
-            System.Drawing.Imaging.BitmapData mapBmpData = colouredMap.LockBits(rect,
-                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            BitmapData mapBmpData = colouredMap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             // Get the address of the first line.
             IntPtr mapPtr = mapBmpData.Scan0;
 
             // Declare an array to hold the shaderBytes of the bitmap. 
             int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
-            byte[] MapRgbValues = new byte[mapBytes];
+            byte[] mapRgbValues = new byte[mapBytes];
 
             // Copy the RGB values into the array.
-            System.Runtime.InteropServices.Marshal.Copy(mapPtr, MapRgbValues, 0, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
             #endregion
 
             #region Reading Shader Bitmap, if needed.
@@ -222,8 +244,8 @@ namespace Plasma_Fractal
 
             if (shaderMap != null)
             {
-                System.Drawing.Imaging.BitmapData shaderBmpData = shaderMap.LockBits(rect,
-                System.Drawing.Imaging.ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
                 // Get the address of the first line.
                 IntPtr shaderPtr = shaderBmpData.Scan0;
@@ -239,111 +261,111 @@ namespace Plasma_Fractal
 
             #region Colour Selecting.
             //Is in the format BGR, NOT RGB!!!
-            for (int i = 0; i < MapRgbValues.Length; i += 3)
+            for (int i = 0; i < mapRgbValues.Length; i += 3)
             {
                 //Snow Peak
-                if (MapRgbValues[i] < 10)
+                if (mapRgbValues[i] < 10)
                 {
-                    MapRgbValues[i] = 175;    //Blue component
-                    MapRgbValues[i + 1] = 181;   //Green Component
-                    MapRgbValues[i + 2] = 174;   //Red Component
+                    mapRgbValues[i] = 175;    //Blue component
+                    mapRgbValues[i + 1] = 181;   //Green Component
+                    mapRgbValues[i + 2] = 174;   //Red Component
                 }
                 //High Mountains
-                else if (MapRgbValues[i] < 25)
+                else if (mapRgbValues[i] < 25)
                 {
-                    MapRgbValues[i] = 130;
-                    MapRgbValues[i + 1] = 131;
-                    MapRgbValues[i + 2] = 149;
+                    mapRgbValues[i] = 130;
+                    mapRgbValues[i + 1] = 131;
+                    mapRgbValues[i + 2] = 149;
                 }
                 //Low Mountains
-                else if (MapRgbValues[i] < 50)
+                else if (mapRgbValues[i] < 50)
                 {
-                    MapRgbValues[i] = 99;
-                    MapRgbValues[i + 1] = 102;
-                    MapRgbValues[i + 2] = 102;
+                    mapRgbValues[i] = 99;
+                    mapRgbValues[i + 1] = 102;
+                    mapRgbValues[i + 2] = 102;
                 }
 
                 //Dark grass
-                else if (MapRgbValues[i] < 70)
+                else if (mapRgbValues[i] < 70)
                 {
-                    MapRgbValues[i] = 48;
-                    MapRgbValues[i + 1] = 79;
-                    MapRgbValues[i + 2] = 40;
+                    mapRgbValues[i] = 48;
+                    mapRgbValues[i + 1] = 79;
+                    mapRgbValues[i + 2] = 40;
                 }
                 //Light Grass
-                else if (MapRgbValues[i] < 145)
+                else if (mapRgbValues[i] < 145)
                 {
-                    MapRgbValues[i] = 60;
-                    MapRgbValues[i + 1] = 95;
-                    MapRgbValues[i + 2] = 48;
+                    mapRgbValues[i] = 60;
+                    mapRgbValues[i + 1] = 95;
+                    mapRgbValues[i + 2] = 48;
                 }
                 //Shore 1 - Inner Light Sand
-                else if (MapRgbValues[i] < 150)
+                else if (mapRgbValues[i] < 150)
                 {
-                    MapRgbValues[i] = 110;
-                    MapRgbValues[i + 1] = 163;
-                    MapRgbValues[i + 2] = 140;
+                    mapRgbValues[i] = 110;
+                    mapRgbValues[i + 1] = 163;
+                    mapRgbValues[i + 2] = 140;
                 }
                 //Shore 2 - Outer Dark Sand
-                else if (MapRgbValues[i] < 148)
+                else if (mapRgbValues[i] < 148)
                 {
-                    MapRgbValues[i] = 227;
-                    MapRgbValues[i + 1] = 227;
-                    MapRgbValues[i + 2] = 10;
+                    mapRgbValues[i] = 227;
+                    mapRgbValues[i + 1] = 227;
+                    mapRgbValues[i + 2] = 10;
                 }
                 //Shore 3 - Water
-                else if (MapRgbValues[i] < 155)
+                else if (mapRgbValues[i] < 155)
                 {
-                    MapRgbValues[i] = 122;
-                    MapRgbValues[i + 1] = 96;
-                    MapRgbValues[i + 2] = 10;
+                    mapRgbValues[i] = 122;
+                    mapRgbValues[i + 1] = 96;
+                    mapRgbValues[i + 2] = 10;
                 }
                 //Reef
-                else if (MapRgbValues[i] < 170)
+                else if (mapRgbValues[i] < 170)
                 {
-                    MapRgbValues[i] = 95;
-                    MapRgbValues[i + 1] = 71;
-                    MapRgbValues[i + 2] = 38;
+                    mapRgbValues[i] = 95;
+                    mapRgbValues[i + 1] = 71;
+                    mapRgbValues[i + 2] = 38;
                 }
                 //Sea
-                else if (MapRgbValues[i] < 200)
+                else if (mapRgbValues[i] < 200)
                 {
-                    MapRgbValues[i] = 73;
-                    MapRgbValues[i + 1] = 60;
-                    MapRgbValues[i + 2] = 38;
+                    mapRgbValues[i] = 73;
+                    mapRgbValues[i + 1] = 60;
+                    mapRgbValues[i + 2] = 38;
                 }
                 //Deep Sea
                 else
                 {
-                    MapRgbValues[i] = 78;
-                    MapRgbValues[i + 1] = 59;
-                    MapRgbValues[i + 2] = 40;
+                    mapRgbValues[i] = 78;
+                    mapRgbValues[i + 1] = 59;
+                    mapRgbValues[i + 2] = 40;
                 }
 
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
-                    MapRgbValues[i] = (byte)Math.Min(255, (int)(MapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
-                    MapRgbValues[i + 1] = (byte)Math.Min(255, (int)(MapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
-                    MapRgbValues[i + 2] = (byte)Math.Min(255, (int)(MapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
                 }
                 #endregion
 
                 #region Noise Adding.
                 if (noise)  //Displacing the pixel colour by a random amount.
                 {
-                    MapRgbValues[i] = (byte)Math.Min(255, (MapRgbValues[i] + (int)(((float)MapRgbValues[i] / 255) * rand.Next(-60, 60))));
-                    MapRgbValues[i + 1] = (byte)Math.Min(255, (MapRgbValues[i + 1] + (int)(((float)MapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
-                    MapRgbValues[i + 2] = (byte)Math.Min(255, (MapRgbValues[i + 2] + (int)(((float)MapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
                 }
                 #endregion
             }
             #endregion
 
             // Copy the RGB values back to the bitmap
-            System.Runtime.InteropServices.Marshal.Copy(MapRgbValues, 0, mapPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
 
-            // Unlock the bits.
+            // Unlock the bits and return.
             colouredMap.UnlockBits(mapBmpData);
             return colouredMap;
         }
