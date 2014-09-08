@@ -163,42 +163,62 @@ namespace Plasma_Fractal
                 if (mapRgbValues[i] < 50)
                 {
                     mapRgbValues[i] = 100;
+                    mapRgbValues[i+1] = 100;
+                    mapRgbValues[i+2] = 100;
                 }
                 else if (mapRgbValues[i] < 100)
                 {
-                    mapRgbValues[i] = 120;
+                    mapRgbValues[i]   = 120;
+                    mapRgbValues[i+1] = 120;
+                    mapRgbValues[i+2] = 120;
                 }
                 else if (mapRgbValues[i] < 150)
                 {
                     mapRgbValues[i] = 140;
+                    mapRgbValues[i + 1] = 140;
+                    mapRgbValues[i + 2] = 140;
                 }
                 else if (mapRgbValues[i] < 200)
                 {
                     mapRgbValues[i] = 160;
+                    mapRgbValues[i + 1] = 160;
+                    mapRgbValues[i + 2] = 160;
                 }
                 else if (mapRgbValues[i] < 250)
                 {
                     mapRgbValues[i] = 180;
+                    mapRgbValues[i + 1] = 180;
+                    mapRgbValues[i + 2] = 180;
                 }
                 else if (mapRgbValues[i] < 150)
                 {
                     mapRgbValues[i] = 200;
+                    mapRgbValues[i + 1] = 200;
+                    mapRgbValues[i + 2] = 200;
                 }
                 else if (mapRgbValues[i] < 175)
                 {
                     mapRgbValues[i] = 220;
+                    mapRgbValues[i + 1] = 220;
+                    mapRgbValues[i + 2] = 220;
                 }
                 else if (mapRgbValues[i] < 200)
                 {
                     mapRgbValues[i] = 240;
+                    mapRgbValues[i + 1] = 240;
+                    mapRgbValues[i + 2] = 240;
                 }
                 else if (mapRgbValues[i] < 225)
                 {
                     mapRgbValues[i] = 240;
+                    mapRgbValues[i + 1] = 240;
+                    mapRgbValues[i + 2] = 240;
                 }
                 else
                 {
                     mapRgbValues[i] = 250;
+                    mapRgbValues[i + 1] = 250;
+                    mapRgbValues[i + 2] = 250;
                 }
 
                 #region Shading.
@@ -372,6 +392,96 @@ namespace Plasma_Fractal
                     mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
                 }
                 #endregion
+            }
+            #endregion
+
+            // Copy the RGB values back to the bitmap
+            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
+
+            // Unlock the bits and return.
+            colouredMap.UnlockBits(mapBmpData);
+            return colouredMap;
+        }
+
+        public static Bitmap ColourBitmapHeightMapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        {
+            Bitmap colouredMap = new Bitmap(map);
+
+            #region Reading Main Map Bitmap.
+            //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
+
+            BitmapData mapBmpData = colouredMap.LockBits(rect,
+                ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            // Get the address of the first line.
+            IntPtr mapPtr = mapBmpData.Scan0;
+
+            // Declare an array to hold the shaderBytes of the bitmap. 
+            int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
+            byte[] mapRgbValues = new byte[mapBytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
+            #endregion
+
+            #region Reading Shader Bitmap, if needed.
+            byte[] shaderRgbValues = null;
+
+            if (shaderMap != null)
+            {
+                BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                // Get the address of the first line.
+                IntPtr shaderPtr = shaderBmpData.Scan0;
+
+                // Declare an array to hold the shaderBytes of the bitmap. 
+                int shaderBytes = Math.Abs(shaderBmpData.Stride) * colouredMap.Height;
+                shaderRgbValues = new byte[shaderBytes];
+
+                // Copy the RGB values into the array.
+                System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
+            }
+            #endregion
+
+            #region Colour Selecting.
+            //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
+            for (int i = 0; i < mapRgbValues.Length; i += 3)
+            {
+                if (mapRgbValues[i] < 145)
+                {
+                    mapRgbValues[i + 1] = mapRgbValues[i];
+                    mapRgbValues[i + 2] = mapRgbValues[i];
+                }
+                else
+                {
+                    mapRgbValues[i] = 145;
+                    mapRgbValues[i + 1] = 145;
+                    mapRgbValues[i + 2] = 145;
+                }
+
+                /*
+                #region Shading.
+                if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
+                {
+                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                }
+                #endregion
+
+                #region Noise Adding.
+                if (noise)  //Displacing the pixel colour by a random amount.
+                {
+                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                }
+                #endregion
+                 * */
+
             }
             #endregion
 
