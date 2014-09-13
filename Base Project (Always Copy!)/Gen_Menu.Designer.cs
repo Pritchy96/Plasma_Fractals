@@ -37,11 +37,15 @@
             this.chk_Shaded = new System.Windows.Forms.CheckBox();
             this.chk_Noise = new System.Windows.Forms.CheckBox();
             this.chk_Linked = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtBaseRough = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtShaderRough = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btn_Generate
             // 
-            this.btn_Generate.Location = new System.Drawing.Point(26, 202);
+            this.btn_Generate.Location = new System.Drawing.Point(25, 249);
             this.btn_Generate.Name = "btn_Generate";
             this.btn_Generate.Size = new System.Drawing.Size(75, 23);
             this.btn_Generate.TabIndex = 0;
@@ -137,11 +141,51 @@
             this.chk_Linked.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chk_Linked.UseVisualStyleBackColor = true;
             // 
-            // Options_Menu
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(14, 170);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(91, 13);
+            this.label3.TabIndex = 10;
+            this.label3.Text = "Base Roughness:";
+            // 
+            // txtBaseRough
+            // 
+            this.txtBaseRough.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtBaseRough.Location = new System.Drawing.Point(38, 189);
+            this.txtBaseRough.Name = "txtBaseRough";
+            this.txtBaseRough.Size = new System.Drawing.Size(46, 13);
+            this.txtBaseRough.TabIndex = 9;
+            this.txtBaseRough.Text = "24";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(9, 211);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(101, 13);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "Shader Roughness:";
+            // 
+            // txtShaderRough
+            // 
+            this.txtShaderRough.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtShaderRough.Location = new System.Drawing.Point(38, 227);
+            this.txtShaderRough.Name = "txtShaderRough";
+            this.txtShaderRough.Size = new System.Drawing.Size(46, 13);
+            this.txtShaderRough.TabIndex = 11;
+            this.txtShaderRough.Text = "18";
+            // 
+            // Gen_Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(122, 237);
+            this.ClientSize = new System.Drawing.Size(122, 281);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtShaderRough);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtBaseRough);
             this.Controls.Add(this.chk_Linked);
             this.Controls.Add(this.chk_Noise);
             this.Controls.Add(this.chk_Shaded);
@@ -154,7 +198,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Options_Menu";
+            this.Name = "Gen_Menu";
             this.Text = "Options";
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -172,6 +216,10 @@
         private System.Windows.Forms.CheckBox chk_Shaded;
         private System.Windows.Forms.CheckBox chk_Noise;
         private System.Windows.Forms.CheckBox chk_Linked;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtBaseRough;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox txtShaderRough;
 
     }
 }

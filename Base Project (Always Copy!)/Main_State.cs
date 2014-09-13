@@ -25,18 +25,18 @@ namespace Plasma_Fractal
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
         }
 
-        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true)
+        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int baseRoughness = 24, int shaderRoughness = 18)
         {
             islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
             //24 is a good setting here for anything under 2000x2000 (ish)
-            shader = Fractal_Creator.MakeFractal(width, height, 24);
+            shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
             shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 255);
 
             //18 is a good setting here for anything under 2000x2000 (ish)
-            islandFractal = Fractal_Creator.MakeFractal(width, height, 18);
+            islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
             #region Specifying Image parameters (Colour, shade etc)
             if (coloured)   //Colour the island.

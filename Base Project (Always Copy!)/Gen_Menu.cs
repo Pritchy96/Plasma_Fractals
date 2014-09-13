@@ -36,7 +36,7 @@ namespace Plasma_Fractal
         {
             try
             {
-                mainState.MakeIsland(int.Parse(txt_Width.Text), int.Parse(txt_Height.Text), chk_Coloured.Checked, chk_Shaded.Checked, chk_Noise.Checked);
+                mainState.MakeIsland(int.Parse(txt_Width.Text), int.Parse(txt_Height.Text), chk_Coloured.Checked, chk_Shaded.Checked, chk_Noise.Checked, int.Parse(txtBaseRough.Text), int.Parse(txtShaderRough.Text));
             }
             catch (FormatException)
             {
