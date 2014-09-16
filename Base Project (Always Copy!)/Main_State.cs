@@ -14,6 +14,7 @@ namespace Plasma_Fractal
         Bitmap islandFractal, islandColoured, shader, heightMap;
         Island_Display islandDisplay;
         Gen_Menu optionsMenu;
+        Random rand = new Random();
 
         public Main_State(int width, int height, Island_Display islandDisplay)
         {
@@ -31,11 +32,9 @@ namespace Plasma_Fractal
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
-            //24 is a good setting here for anything under 2000x2000 (ish)
             shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
             shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 255);
 
-            //18 is a good setting here for anything under 2000x2000 (ish)
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
             #region Specifying Image parameters (Colour, shade etc)
@@ -103,8 +102,68 @@ namespace Plasma_Fractal
             }
             #endregion
 
-            heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);
+            if (coloured)
+            {
+                for (int i = 0; i < 10; i++)
+                    AddRiver();
+            }
+            heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);   
+        }
+
+        public void AddRiver()
+        {
+            Point currentPixel = new Point();
+            Color riverColour = Color.DarkBlue;
             
+            Point bestDirectionPoint = new Point();
+            int bestValue = 255;
+
+            do
+            {
+                currentPixel.X = rand.Next(10, islandFractal.Width - 10);
+                currentPixel.Y = rand.Next(10, islandFractal.Height - 10);
+            }
+            while (islandFractal.GetPixel(currentPixel.X, currentPixel.Y).B > 150);  //Choose a position which is on high land. (blue heightmap)
+
+            islandColoured.SetPixel(currentPixel.X, currentPixel.Y, riverColour);   //Colour first pixel  
+
+            while (islandFractal.GetPixel(currentPixel.X, currentPixel.Y).B < 155)  
+            {
+
+                bestValue = 0;
+
+                if (islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && islandColoured.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != Color.DarkBlue.ToArgb()) 
+                {
+                    bestValue = islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B;
+                    bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
+                }
+
+                if (islandFractal.GetPixel(currentPixel.X, currentPixel.Y + 1).B > bestValue && islandColoured.GetPixel(currentPixel.X, currentPixel.Y + 1).ToArgb() != Color.DarkBlue.ToArgb())
+                {
+                    bestValue = islandFractal.GetPixel(currentPixel.X, currentPixel.Y + 1).B;
+                    bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
+                }
+                if (islandFractal.GetPixel(currentPixel.X - 1, currentPixel.Y).B > bestValue && islandColoured.GetPixel(currentPixel.X - 1, currentPixel.Y).ToArgb() != Color.DarkBlue.ToArgb())
+                {
+                    bestValue = islandFractal.GetPixel(currentPixel.X - 1, currentPixel.Y).B;
+                    bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
+                }
+                if (islandFractal.GetPixel(currentPixel.X + 1, currentPixel.Y).B > bestValue && islandColoured.GetPixel(currentPixel.X + 1, currentPixel.Y).ToArgb() != Color.DarkBlue.ToArgb())
+                {
+                    bestValue = islandFractal.GetPixel(currentPixel.X + 1, currentPixel.Y).B;
+                    bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
+                }
+
+                if (bestValue == 0)
+                {
+                    islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+                    bestDirectionPoint.X += 2;
+                }
+
+                islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+                currentPixel = bestDirectionPoint;
+            }
+        
         }
 
         public void Update()
@@ -120,7 +179,7 @@ namespace Plasma_Fractal
         {
             if (e.Button == MouseButtons.Left)
             {
-                heightMap.Save("C:/Users/Pritchy/Desktop/HeightMap.png");
+                islandFractal.Save("C:/Users/Pritchy/Desktop/HeightMap.png");
                 islandColoured.Save("C:/Users/Pritchy/Desktop/Island.png");
                 MessageBox.Show("Image Saved to Desktop!");
             }

@@ -113,7 +113,7 @@ namespace Plasma_Fractal
             }
         }
 
-        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, Bitmap originalMap = null, bool noise = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
 
