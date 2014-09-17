@@ -113,7 +113,7 @@ namespace Plasma_Fractal
             }
         }
 
-        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, Bitmap originalMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
 
@@ -250,7 +250,7 @@ namespace Plasma_Fractal
             return colouredMap;
         }
 
-        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmap(Bitmap map, Bitmap originalMap, Bitmap shaderMap = null, bool noise = true, bool rivers = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
 
@@ -289,6 +289,13 @@ namespace Plasma_Fractal
 
                 // Copy the RGB values into the array.
                 System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
+            }
+            #endregion
+
+            #region Rivers
+            if (rivers)
+            {
+
             }
             #endregion
 

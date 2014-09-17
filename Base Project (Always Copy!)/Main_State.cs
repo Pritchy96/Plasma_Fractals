@@ -46,11 +46,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, shader, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, shader, false, true, 255);
                     }
                     #endregion
                 }
@@ -59,11 +59,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, null, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, null, false, true, 255);
                     }
                     #endregion
                 }
@@ -104,20 +104,24 @@ namespace Plasma_Fractal
 
             if (coloured)
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 20; i++)
                     AddRiver();
             }
-            heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);   
+            heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);
         }
 
         public void AddRiver()
         {
             Point currentPixel = new Point();
             Color riverColour = Color.DarkBlue;
-            
+
+            //The lightest (lowest height) direction.
             Point bestDirectionPoint = new Point();
             int bestValue = 255;
 
+            Point lastMove = new Point();
+
+            //Find a suitable starting location/spring.
             do
             {
                 currentPixel.X = rand.Next(10, islandFractal.Width - 10);
@@ -125,14 +129,20 @@ namespace Plasma_Fractal
             }
             while (islandFractal.GetPixel(currentPixel.X, currentPixel.Y).B > 150);  //Choose a position which is on high land. (blue heightmap)
 
+            //Colour the starting location.
             islandColoured.SetPixel(currentPixel.X, currentPixel.Y, riverColour);   //Colour first pixel  
 
-            while (islandFractal.GetPixel(currentPixel.X, currentPixel.Y).B < 155)  
+            #region Carve River
+            while (islandFractal.GetPixel(currentPixel.X, currentPixel.Y).B < 155)  //WHile we're not at sea level..
             {
 
-                bestValue = 0;
+                if (currentPixel.Y - 1 < 0 || currentPixel.X - 1 < 0 || currentPixel.Y + 1 >= islandColoured.Height || currentPixel.X + 1 >= islandColoured.Width)
+                {
+                    break;
+                }
+                bestValue = 0;  //reset the highest value each iteration.
 
-                if (islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && islandColoured.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != Color.DarkBlue.ToArgb()) 
+                if (islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && islandColoured.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != Color.DarkBlue.ToArgb())
                 {
                     bestValue = islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B;
                     bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
@@ -154,16 +164,32 @@ namespace Plasma_Fractal
                     bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
                 }
 
+                //If there is no where which has not been visited around us, 
+                //This will be repeated until we can move somewhere.
                 if (bestValue == 0)
                 {
                     islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
-                    bestDirectionPoint.X += 2;
-                }
 
-                islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
-                currentPixel = bestDirectionPoint;
+                    Point temp = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y);
+                    bestDirectionPoint.X += temp.X;
+                    bestDirectionPoint.Y += temp.Y;
+                    currentPixel.X += temp.X;
+                    currentPixel.Y += temp.Y;
+                    islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+
+                }
+                else
+                {
+                    islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+                    lastMove = currentPixel;
+                    currentPixel = bestDirectionPoint;
+                }
+                
+                
+                
+                
             }
-        
+            #endregion
         }
 
         public void Update()
