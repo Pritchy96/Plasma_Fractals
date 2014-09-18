@@ -46,11 +46,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, shader, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, shader, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, true, 255);
                     }
                     #endregion
                 }
@@ -59,11 +59,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, null, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, islandFractal, null, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, true, 255);
                     }
                     #endregion
                 }
@@ -104,8 +104,8 @@ namespace Plasma_Fractal
 
             if (coloured)
             {
-                for (int i = 0; i < 20; i++)
-                    AddRiver();
+                //for (int i = 0; i < 20; i++)
+                  //  AddRiver();
             }
             heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);
         }
@@ -183,11 +183,7 @@ namespace Plasma_Fractal
                     islandColoured.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
                     lastMove = currentPixel;
                     currentPixel = bestDirectionPoint;
-                }
-                
-                
-                
-                
+                }    
             }
             #endregion
         }
