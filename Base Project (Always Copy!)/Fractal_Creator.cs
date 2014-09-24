@@ -113,9 +113,95 @@ namespace Plasma_Fractal
             }
         }
 
-        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int alpha = 255)
+        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, bool rivers = true, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
+
+            #region Rivers
+            if (rivers)
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    Point currentPixel = new Point();
+                    Color riverColour = Color.FromArgb(200, 200, 200);
+
+                    //The lightest (lowest height) direction.
+                    Point bestDirectionPoint = new Point();
+                    int bestValue = 255;
+
+                    Point lastMove = new Point();
+
+                    //Find a suitable starting location/spring.
+                    do
+                    {
+                        currentPixel.X = rand.Next(10, map.Width - 10);
+                        currentPixel.Y = rand.Next(10, map.Height - 10);
+                    }
+                    while (map.GetPixel(currentPixel.X, currentPixel.Y).B > 150);  //Choose a position which is on high land. (blue heightmap)
+
+                    //Colour the starting location.
+                    colouredMap.SetPixel(currentPixel.X, currentPixel.Y, riverColour);   //Colour first pixel  
+
+                    #region Carve River
+                    while (map.GetPixel(currentPixel.X, currentPixel.Y).B < 155)  //WHile we're not at sea level..
+                    {
+                        Console.WriteLine(map.GetPixel(currentPixel.X, currentPixel.Y).B.ToString());
+
+                        if (currentPixel.Y - 1 < 0 || currentPixel.X - 1 < 0 || currentPixel.Y + 1 >= colouredMap.Height || currentPixel.X + 1 >= colouredMap.Width)
+                        {
+                            break;
+                        }
+
+                        bestValue = 0;  //reset the highest value each iteration.
+
+                        if (map.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && colouredMap.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != riverColour.ToArgb())
+                        {
+                            bestValue = map.GetPixel(currentPixel.X, currentPixel.Y - 1).B;
+                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
+                        }
+
+                        if (map.GetPixel(currentPixel.X, currentPixel.Y + 1).B > bestValue && colouredMap.GetPixel(currentPixel.X, currentPixel.Y + 1).ToArgb() != riverColour.ToArgb())
+                        {
+                            bestValue = map.GetPixel(currentPixel.X, currentPixel.Y + 1).B;
+                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
+                        }
+                        if (map.GetPixel(currentPixel.X - 1, currentPixel.Y).B > bestValue && colouredMap.GetPixel(currentPixel.X - 1, currentPixel.Y).ToArgb() != riverColour.ToArgb())
+                        {
+                            bestValue = map.GetPixel(currentPixel.X - 1, currentPixel.Y).B;
+                            bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
+                        }
+                        if (map.GetPixel(currentPixel.X + 1, currentPixel.Y).B > bestValue && colouredMap.GetPixel(currentPixel.X + 1, currentPixel.Y).ToArgb() != riverColour.ToArgb())
+                        {
+                            bestValue = map.GetPixel(currentPixel.X + 1, currentPixel.Y).B;
+                            bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
+                        }
+
+                        //If there is no where which has not been visited around us, 
+                        //This will be repeated until we can move somewhere.
+                        if (bestValue == 0)
+                        {
+                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+
+                            Point temp = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y);
+                            bestDirectionPoint.X += temp.X;
+                            bestDirectionPoint.Y += temp.Y;
+                            currentPixel.X += temp.X;
+                            currentPixel.Y += temp.Y;
+                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+
+                        }
+                        else
+                        {
+                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
+                            lastMove = currentPixel;
+                            currentPixel = bestDirectionPoint;
+                        }
+                    }
+
+                    #endregion
+                }
+            }
+            #endregion
 
             #region Reading Main Map Bitmap.
             //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
@@ -155,6 +241,8 @@ namespace Plasma_Fractal
                 System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
             }
             #endregion
+
+       
 
             #region Colour Selecting.
             //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
@@ -339,7 +427,6 @@ namespace Plasma_Fractal
                 }
             }
             #endregion
-
 
             #region Reading Main Map Bitmap.
             //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx

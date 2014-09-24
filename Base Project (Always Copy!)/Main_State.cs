@@ -33,7 +33,7 @@ namespace Plasma_Fractal
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
             shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
-            shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 255);
+            shader = Fractal_Creator.ColourBitmapBW(shader, null, false, false, 255);
 
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
@@ -77,11 +77,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, true, 255);
                     }
                     #endregion
                 }
@@ -90,11 +90,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, true, 255);
                     }
                     #endregion
                 }
