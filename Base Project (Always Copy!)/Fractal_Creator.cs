@@ -241,9 +241,7 @@ namespace Plasma_Fractal
                 System.Runtime.InteropServices.Marshal.Copy(shaderPtr, shaderRgbValues, 0, shaderBytes);
             }
             #endregion
-
-       
-
+      
             #region Colour Selecting.
             //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
             for (int i = 0; i < mapRgbValues.Length; i += 3)
@@ -621,41 +619,114 @@ namespace Plasma_Fractal
             #endregion
 
             #region Colour Selecting.
-            //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
+            //Is in the format BGR, NOT RGB!!!
             for (int i = 0; i < mapRgbValues.Length; i += 3)
             {
-                if (mapRgbValues[i] < 145)
+                //Snow Peak
+                if (mapRgbValues[i] < 10)
                 {
-                    mapRgbValues[i + 1] = mapRgbValues[i];
-                    mapRgbValues[i + 2] = mapRgbValues[i];
+                    mapRgbValues[i] = 50;    //Blue component
+                    mapRgbValues[i + 1] = 50;   //Green Component
+                    mapRgbValues[i + 2] = 50;   //Red Component
                 }
-                else
+                //High Mountains
+                else if (mapRgbValues[i] < 25)
                 {
-                    mapRgbValues[i] = 145;
-                    mapRgbValues[i + 1] = 145;
-                    mapRgbValues[i + 2] = 145;
+                    mapRgbValues[i] = 70;
+                    mapRgbValues[i + 1] = 70;
+                    mapRgbValues[i + 2] = 70;
+                }
+                //Low Mountains
+                else if (mapRgbValues[i] < 50)
+                {
+                    mapRgbValues[i] = 90;
+                    mapRgbValues[i + 1] = 90;
+                    mapRgbValues[i + 2] = 90;
                 }
 
-                /*
+                //Dark grass
+                else if (mapRgbValues[i] < 70)
+                {
+                    mapRgbValues[i] = 110;
+                    mapRgbValues[i + 1] = 110;
+                    mapRgbValues[i + 2] = 110;
+                }
+                //Light Grass
+                else if (mapRgbValues[i] < 145)
+                {
+                    mapRgbValues[i] = 130;
+                    mapRgbValues[i + 1] = 130;
+                    mapRgbValues[i + 2] = 130;
+                }
+                //Shore 1 - Inner Light Sand
+                else if (mapRgbValues[i] < 150)
+                {
+                    mapRgbValues[i] = 150;
+                    mapRgbValues[i + 1] = 150;
+                    mapRgbValues[i + 2] = 150;
+                }
+                //Shore 2 - Outer Dark Sand
+                else if (mapRgbValues[i] < 148)
+                {
+                    mapRgbValues[i] = 170;
+                    mapRgbValues[i + 1] = 170;
+                    mapRgbValues[i + 2] = 170;
+                }
+                //Shore 3 - Water
+                else if (mapRgbValues[i] < 155)
+                {
+                    mapRgbValues[i] = 190;
+                    mapRgbValues[i + 1] = 190;
+                    mapRgbValues[i + 2] = 190;
+                }
+                //Reef
+                else if (mapRgbValues[i] < 170)
+                {
+                    mapRgbValues[i] = 210;
+                    mapRgbValues[i + 1] = 210;
+                    mapRgbValues[i + 2] = 210;
+                }
+                //Sea
+                else if (mapRgbValues[i] < 200)
+                {
+                    mapRgbValues[i] = 230;
+                    mapRgbValues[i + 1] = 230;
+                    mapRgbValues[i + 2] = 230;
+                }
+                //Deep Sea
+                else
+                {
+                    mapRgbValues[i] = 250;
+                    mapRgbValues[i + 1] = 250;
+                    mapRgbValues[i + 2] = 250;
+                }
+
+
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
-                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
-                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
-                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 300)));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 300)));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 300)));
                 }
+                    /*
+                else if (mapRgbValues[i] < 255 && shaderMap != null)
+                {
+                   // mapRgbValues[i] += 10;
+                   // mapRgbValues[i + 1] += 10;
+                   // mapRgbValues[i + 2] += 10;
+                }
+                     * */
                 #endregion
-
+                
                 #region Noise Adding.
                 if (noise)  //Displacing the pixel colour by a random amount.
                 {
-                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(-60, 60))));
-                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
-                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(0, 60))));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(0, 60))));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(0, 60))));
                 }
                 #endregion
-                 * */
-
             }
             #endregion
 

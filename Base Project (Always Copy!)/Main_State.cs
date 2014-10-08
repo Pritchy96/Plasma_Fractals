@@ -46,11 +46,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, false, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, false, 255);
                     }
                     #endregion
                 }
@@ -59,11 +59,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, false, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, false, 255);
                     }
                     #endregion
                 }
@@ -77,11 +77,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, false, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, false, 255);
                     }
                     #endregion
                 }
@@ -90,11 +90,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, false, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, true, 255);
+                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, false, 255);
                     }
                     #endregion
                 }
@@ -107,7 +107,7 @@ namespace Plasma_Fractal
                 //for (int i = 0; i < 20; i++)
                   //  AddRiver();
             }
-            heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, null, false, 255);
+
         }
 
         public void AddRiver()
@@ -201,8 +201,9 @@ namespace Plasma_Fractal
         {
             if (e.Button == MouseButtons.Left)
             {
-                islandFractal.Save("C:/Users/Pritchy/Desktop/HeightMap.png");
-                islandColoured.Save("C:/Users/Pritchy/Desktop/Island.png");
+                heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, Fractal_Creator.MakeFractal(islandFractal.Width, islandFractal.Height), false, 255);
+                heightMap.Save("C:/Users/Pritchy/Desktop/HeightMap.bmp", ImageFormat.Bmp);
+                islandColoured.Save("C:/Users/Pritchy/Desktop/ColourMap.bmp", ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
             }
             else
