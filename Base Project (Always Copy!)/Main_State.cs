@@ -38,68 +38,8 @@ namespace Plasma_Fractal
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
             #region Specifying Image parameters (Colour, shade etc)
-            if (coloured)   //Colour the island.
-            {
-                #region Shade
-                if (shaded)
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, false, 255);
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, false, 255);
-                    }
-                    #endregion
-                }
-                #endregion
-            }
-            else   //Keep the island Black and White
-            {
-                #region Shade
-                if (shaded)
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, false, 255);
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, false, 255);
-                    }
-                    #endregion
-                }
-                #endregion
-            }
+
+            islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, false, 255);
             #endregion
 
             if (coloured)
