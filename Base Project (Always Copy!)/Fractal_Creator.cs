@@ -550,9 +550,9 @@ namespace Plasma_Fractal
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
-                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 255)));
-                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 255)));
-                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 255)));
+                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 180)));
+                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 180)));
+                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 180)));
                 }
                 #endregion
 
