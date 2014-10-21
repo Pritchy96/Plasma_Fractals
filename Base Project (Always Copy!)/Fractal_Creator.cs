@@ -58,7 +58,7 @@ namespace Plasma_Fractal
 
         /// <summary>
         /// </summary>
-        /// <param name="mapRgbValues"> Array of BGR Bytes </param>
+        /// <param name="colMapRgbValues"> Array of BGR Bytes </param>
         /// <param name="bitmapWidth"> Width of the bitmap image </param>
         /// <param name="x"> X Pos </param>
         /// <param name="y"> Y Pos </param>
@@ -340,104 +340,34 @@ namespace Plasma_Fractal
         {
             Bitmap colouredMap = new Bitmap(map);
 
-            #region Rivers
-            if (rivers)
-            {
-                for (int i = 0; i < 20; i++)
-                {
-                    Point currentPixel = new Point();
-                    Color riverColour = Color.FromArgb(200, 200, 200);
-
-                    //The lightest (lowest height) direction.
-                    Point bestDirectionPoint = new Point();
-                    int bestValue = 255;
-
-                    Point lastMove = new Point();
-
-                    //Find a suitable starting location/spring.
-                    do
-                    {
-                        currentPixel.X = rand.Next(10, map.Width - 10);
-                        currentPixel.Y = rand.Next(10, map.Height - 10);
-                    }
-                    while (map.GetPixel(currentPixel.X, currentPixel.Y).B > 150);  //Choose a position which is on high land. (blue heightmap)
-
-                    //Colour the starting location.
-                    colouredMap.SetPixel(currentPixel.X, currentPixel.Y, riverColour);   //Colour first pixel  
-
-                    #region Carve River
-                    while (map.GetPixel(currentPixel.X, currentPixel.Y).B < 155)  //WHile we're not at sea level..
-                    {
-                        Console.WriteLine(map.GetPixel(currentPixel.X, currentPixel.Y).B.ToString());
-
-                        if (currentPixel.Y - 1 < 0 || currentPixel.X - 1 < 0 || currentPixel.Y + 1 >= colouredMap.Height || currentPixel.X + 1 >= colouredMap.Width)
-                        {
-                            break;
-                        }
-
-                        bestValue = 0;  //reset the highest value each iteration.
-
-                        if (map.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && colouredMap.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != riverColour.ToArgb())
-                        {
-                            bestValue = map.GetPixel(currentPixel.X, currentPixel.Y - 1).B;
-                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
-                        }
-
-                        if (map.GetPixel(currentPixel.X, currentPixel.Y + 1).B > bestValue && colouredMap.GetPixel(currentPixel.X, currentPixel.Y + 1).ToArgb() != riverColour.ToArgb())
-                        {
-                            bestValue = map.GetPixel(currentPixel.X, currentPixel.Y + 1).B;
-                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
-                        }
-                        if (map.GetPixel(currentPixel.X - 1, currentPixel.Y).B > bestValue && colouredMap.GetPixel(currentPixel.X - 1, currentPixel.Y).ToArgb() != riverColour.ToArgb())
-                        {
-                            bestValue = map.GetPixel(currentPixel.X - 1, currentPixel.Y).B;
-                            bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
-                        }
-                        if (map.GetPixel(currentPixel.X + 1, currentPixel.Y).B > bestValue && colouredMap.GetPixel(currentPixel.X + 1, currentPixel.Y).ToArgb() != riverColour.ToArgb())
-                        {
-                            bestValue = map.GetPixel(currentPixel.X + 1, currentPixel.Y).B;
-                            bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
-                        }
-
-                        //If there is no where which has not been visited around us, 
-                        //This will be repeated until we can move somewhere.
-                        if (bestValue == 0)
-                        {
-                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
-
-                            Point temp = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y);
-                            bestDirectionPoint.X += temp.X;
-                            bestDirectionPoint.Y += temp.Y;
-                            currentPixel.X += temp.X;
-                            currentPixel.Y += temp.Y;
-                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
-
-                        }
-                        else
-                        {
-                            colouredMap.SetPixel(bestDirectionPoint.X, bestDirectionPoint.Y, riverColour);   //Colour first pixel  
-                            lastMove = currentPixel;
-                            currentPixel = bestDirectionPoint;
-                        }
-                    }
-
-                    #endregion
-                }
-            }
-            #endregion
-
-            #region Reading Main Map Bitmap.
+            #region Reading Colour Map Bitmap.
             //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
             // Lock the bitmap's bits.  
             Rectangle rect = new Rectangle(0, 0, colouredMap.Width, colouredMap.Height);
 
-            BitmapData mapBmpData = colouredMap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            BitmapData colMapBmpData = colouredMap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            // Get the address of the first line.
+            IntPtr colMapPtr = colMapBmpData.Scan0;
+
+            // Declare an array to hold the shaderBytes of the bitmap. 
+            int colMapBytes = Math.Abs(colMapBmpData.Stride) * colouredMap.Height;
+            byte[] colMapRgbValues = new byte[colMapBytes];
+
+            // Copy the RGB values into the array.
+            System.Runtime.InteropServices.Marshal.Copy(colMapPtr, colMapRgbValues, 0, colMapBytes);
+            #endregion
+
+            #region Reading Main Map Bitmap.
+            //Uses Lockbits, example here: http://msdn.microsoft.com/en-us/library/5ey6h79d(v=vs.110).aspx
+            // Lock the bitmap's bits. 
+            BitmapData mapBmpData = map.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             // Get the address of the first line.
             IntPtr mapPtr = mapBmpData.Scan0;
 
             // Declare an array to hold the shaderBytes of the bitmap. 
-            int mapBytes = Math.Abs(mapBmpData.Stride) * colouredMap.Height;
+            int mapBytes = Math.Abs(mapBmpData.Stride) * map.Height;
             byte[] mapRgbValues = new byte[mapBytes];
 
             // Copy the RGB values into the array.
@@ -446,10 +376,11 @@ namespace Plasma_Fractal
 
             #region Reading Shader Bitmap, if needed.
             byte[] shaderRgbValues = null;
+            BitmapData shaderBmpData = null;
 
             if (shaderMap != null)
             {
-                BitmapData shaderBmpData = shaderMap.LockBits(rect,
+                shaderBmpData = shaderMap.LockBits(rect,
                 ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
                 // Get the address of the first line.
@@ -464,114 +395,233 @@ namespace Plasma_Fractal
             }
             #endregion         
 
+            #region Rivers
+            if (rivers)
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    Point currentPixel = new Point();
+                    Color riverColour = Color.FromArgb(200, 200, 200);
+                    Color pixelColour;
+
+                    //The lightest (lowest height) direction.
+                    Point bestDirectionPoint = new Point();
+                    int bestValue = 255;
+
+                    Point lastMove = new Point();
+
+                    #region Choose Start Location
+                    //Find a suitable starting location/spring.
+                    do
+                    {
+                        currentPixel.X = rand.Next(10, map.Width - 10);
+                        currentPixel.Y = rand.Next(10, map.Height - 10);
+                    }
+                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B > 150);  //Choose a position which is on high land. (blue heightmap)
+
+                    //Colour the starting location.
+                    colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y, map.Width)] = riverColour.B;
+                    colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y, map.Width) + 1] = riverColour.G;
+                    colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y, map.Width) + 2] = riverColour.R;
+                    #endregion
+
+                    #region Carve River
+                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B < 155)  //While we're not at sea level..
+                    {
+                        //Stop if at edge of screen.
+                        if (currentPixel.Y - 1 < 0 || currentPixel.X - 1 < 0 || currentPixel.Y + 1 >= colouredMap.Height || currentPixel.X + 1 >= colouredMap.Width)
+                        {
+                            break;
+                        }
+
+                        bestValue = 0;  //reset the highest value each iteration.
+
+                        #region Checking around currentPixel for steepest drop.
+                        pixelColour = ReturnColour(currentPixel.X, currentPixel.Y - 1, map.Width, colMapRgbValues); //Colour of pixel we're looking at.
+                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)] > bestValue && //If this is the steepest drop...
+                             pixelColour != riverColour)    //And it's not already a river pixel..
+                        {
+                            bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)];
+                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
+                        }
+
+                        pixelColour = ReturnColour(currentPixel.X, currentPixel.Y + 1, map.Width, colMapRgbValues);
+                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)] > bestValue 
+                            && pixelColour != riverColour)
+                        {
+                            bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)];
+                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
+                        }
+
+                        pixelColour = ReturnColour(currentPixel.X - 1, currentPixel.Y, map.Width, colMapRgbValues);
+                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)] > bestValue 
+                            && pixelColour != riverColour)
+                        {
+                            bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)];
+                            bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
+                        }
+
+                        pixelColour = ReturnColour(currentPixel.X + 1, currentPixel.Y, map.Width, colMapRgbValues);
+                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)] > bestValue
+                            && pixelColour != riverColour)
+                        {
+                            bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)];
+                            bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
+                        }
+                        #endregion
+
+                        //If there is no where which has not been visited around us, 
+                        //This will be repeated until we can move somewhere.
+                        if (bestValue == 0)
+                        {
+
+                            try
+                            {
+                                //Find direction we're going in (the direction we went last time).
+                                Point delta = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y); //direction we're going in (straight line)
+                                bestDirectionPoint.X = currentPixel.X + delta.X; //Move along the straight line one pixel.
+                                bestDirectionPoint.Y = currentPixel.Y + delta.Y;
+                                currentPixel.X += delta.X; //Move along the straight line one pixel.
+                                currentPixel.Y += delta.Y;
+
+                                //Colour pixel which is in the direction we were going last iteration.
+                                colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width)] = riverColour.B;
+                                colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width) + 1] = riverColour.G;
+                                colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width) + 2] = riverColour.R;
+                            }
+                            catch (System.IndexOutOfRangeException)
+                            {
+                                break;  //At edge of screen: stop.
+                            }
+
+                        }
+                        else
+                        {
+                            colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width)] = riverColour.B;
+                            colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width) + 1] = riverColour.G;
+                            colMapRgbValues[ConvertTo1DArr(bestDirectionPoint.X, bestDirectionPoint.Y, map.Width) + 2] = riverColour.R;   //Colour first pixel  
+
+                            lastMove = currentPixel;
+                            currentPixel = bestDirectionPoint;
+                        }
+                    }
+
+                    #endregion
+                }
+            }
+            #endregion
+
             #region Colour Selecting.
             //Is in the format BGR, NOT RGB!!!
-            for (int i = 0; i < mapRgbValues.Length; i += 3)
+            for (int i = 0; i < colMapRgbValues.Length; i += 3)
             {
                 //Snow Peak
-                if (mapRgbValues[i] < 10)
+                if (colMapRgbValues[i] < 10)
                 {
-                    mapRgbValues[i] = 175;    //Blue component
-                    mapRgbValues[i + 1] = 181;   //Green Component
-                    mapRgbValues[i + 2] = 174;   //Red Component
+                    colMapRgbValues[i] = 175;    //Blue component
+                    colMapRgbValues[i + 1] = 181;   //Green Component
+                    colMapRgbValues[i + 2] = 174;   //Red Component
                 }
                 //High Mountains
-                else if (mapRgbValues[i] < 25)
+                else if (colMapRgbValues[i] < 25)
                 {
-                    mapRgbValues[i] = 130;
-                    mapRgbValues[i + 1] = 131;
-                    mapRgbValues[i + 2] = 149;
+                    colMapRgbValues[i] = 130;
+                    colMapRgbValues[i + 1] = 131;
+                    colMapRgbValues[i + 2] = 149;
                 }
                 //Low Mountains
-                else if (mapRgbValues[i] < 50)
+                else if (colMapRgbValues[i] < 50)
                 {
-                    mapRgbValues[i] = 99;
-                    mapRgbValues[i + 1] = 102;
-                    mapRgbValues[i + 2] = 102;
+                    colMapRgbValues[i] = 99;
+                    colMapRgbValues[i + 1] = 102;
+                    colMapRgbValues[i + 2] = 102;
                 }
 
                 //Dark grass
-                else if (mapRgbValues[i] < 70)
+                else if (colMapRgbValues[i] < 70)
                 {
-                    mapRgbValues[i] = 48;
-                    mapRgbValues[i + 1] = 79;
-                    mapRgbValues[i + 2] = 40;
+                    colMapRgbValues[i] = 48;
+                    colMapRgbValues[i + 1] = 79;
+                    colMapRgbValues[i + 2] = 40;
                 }
                 //Light Grass
-                else if (mapRgbValues[i] < 145)
+                else if (colMapRgbValues[i] < 145)
                 {
-                    mapRgbValues[i] = 60;
-                    mapRgbValues[i + 1] = 95;
-                    mapRgbValues[i + 2] = 48;
+                    colMapRgbValues[i] = 60;
+                    colMapRgbValues[i + 1] = 95;
+                    colMapRgbValues[i + 2] = 48;
                 }
                 //Shore 1 - Inner Light Sand
-                else if (mapRgbValues[i] < 150)
+                else if (colMapRgbValues[i] < 150)
                 {
-                    mapRgbValues[i] = 110;
-                    mapRgbValues[i + 1] = 163;
-                    mapRgbValues[i + 2] = 140;
+                    colMapRgbValues[i] = 110;
+                    colMapRgbValues[i + 1] = 163;
+                    colMapRgbValues[i + 2] = 140;
                 }
                 //Shore 2 - Outer Dark Sand
-                else if (mapRgbValues[i] < 148)
+                else if (colMapRgbValues[i] < 148)
                 {
-                    mapRgbValues[i] = 227;
-                    mapRgbValues[i + 1] = 227;
-                    mapRgbValues[i + 2] = 10;
+                    colMapRgbValues[i] = 227;
+                    colMapRgbValues[i + 1] = 227;
+                    colMapRgbValues[i + 2] = 10;
                 }
                 //Shore 3 - Water
-                else if (mapRgbValues[i] < 155)
+                else if (colMapRgbValues[i] < 155)
                 {
-                    mapRgbValues[i] = 122;
-                    mapRgbValues[i + 1] = 96;
-                    mapRgbValues[i + 2] = 10;
+                    colMapRgbValues[i] = 122;
+                    colMapRgbValues[i + 1] = 96;
+                    colMapRgbValues[i + 2] = 10;
                 }
                 //Reef
-                else if (mapRgbValues[i] < 170)
+                else if (colMapRgbValues[i] < 170)
                 {
-                    mapRgbValues[i] = 95;
-                    mapRgbValues[i + 1] = 71;
-                    mapRgbValues[i + 2] = 38;
+                    colMapRgbValues[i] = 95;
+                    colMapRgbValues[i + 1] = 71;
+                    colMapRgbValues[i + 2] = 38;
                 }
                 //Sea
-                else if (mapRgbValues[i] < 200)
+                else if (colMapRgbValues[i] < 200)
                 {
-                    mapRgbValues[i] = 73;
-                    mapRgbValues[i + 1] = 60;
-                    mapRgbValues[i + 2] = 38;
+                    colMapRgbValues[i] = 73;
+                    colMapRgbValues[i + 1] = 60;
+                    colMapRgbValues[i + 2] = 38;
                 }
                 //Deep Sea
                 else
                 {
-                    mapRgbValues[i] = 78;
-                    mapRgbValues[i + 1] = 59;
-                    mapRgbValues[i + 2] = 40;
+                    colMapRgbValues[i] = 78;
+                    colMapRgbValues[i + 1] = 59;
+                    colMapRgbValues[i + 2] = 40;
                 }
 
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
-                    mapRgbValues[i] = (byte)Math.Min(255, (int)(mapRgbValues[i] * ((float)shaderRgbValues[i] / 180)));
-                    mapRgbValues[i + 1] = (byte)Math.Min(255, (int)(mapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 180)));
-                    mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 180)));
+                    colMapRgbValues[i] = (byte)Math.Min(255, (int)(colMapRgbValues[i] * ((float)shaderRgbValues[i] / 180)));
+                    colMapRgbValues[i + 1] = (byte)Math.Min(255, (int)(colMapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 180)));
+                    colMapRgbValues[i + 2] = (byte)Math.Min(255, (int)(colMapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 180)));
                 }
                 #endregion
 
                 #region Noise Adding.
                 if (noise)  //Displacing the pixel colour by a random amount.
                 {
-                    mapRgbValues[i] = (byte)Math.Min(255, (mapRgbValues[i] + (int)(((float)mapRgbValues[i] / 255) * rand.Next(-60, 60))));
-                    mapRgbValues[i + 1] = (byte)Math.Min(255, (mapRgbValues[i + 1] + (int)(((float)mapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
-                    mapRgbValues[i + 2] = (byte)Math.Min(255, (mapRgbValues[i + 2] + (int)(((float)mapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                    colMapRgbValues[i] = (byte)Math.Min(255, (colMapRgbValues[i] + (int)(((float)colMapRgbValues[i] / 255) * rand.Next(-60, 60))));
+                    colMapRgbValues[i + 1] = (byte)Math.Min(255, (colMapRgbValues[i + 1] + (int)(((float)colMapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
+                    colMapRgbValues[i + 2] = (byte)Math.Min(255, (colMapRgbValues[i + 2] + (int)(((float)colMapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
                 }
                 #endregion
             }
             #endregion
 
             // Copy the RGB values back to the bitmap
-            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(colMapRgbValues, 0, colMapPtr, colMapBytes);
 
             // Unlock the bits and return.
-            colouredMap.UnlockBits(mapBmpData);
+            colouredMap.UnlockBits(colMapBmpData);
+            map.UnlockBits(mapBmpData);
+            shaderMap.UnlockBits(shaderBmpData);
+
             return colouredMap;
         }
 
@@ -710,11 +760,11 @@ namespace Plasma_Fractal
                     mapRgbValues[i + 2] = (byte)Math.Min(255, (int)(mapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 300)));
                 }
                     /*
-                else if (mapRgbValues[i] < 255 && shaderMap != null)
+                else if (colMapRgbValues[i] < 255 && shaderMap != null)
                 {
-                   // mapRgbValues[i] += 10;
-                   // mapRgbValues[i + 1] += 10;
-                   // mapRgbValues[i + 2] += 10;
+                   // colMapRgbValues[i] += 10;
+                   // colMapRgbValues[i + 1] += 10;
+                   // colMapRgbValues[i + 2] += 10;
                 }
                      * */
                 #endregion
@@ -736,6 +786,18 @@ namespace Plasma_Fractal
             // Unlock the bits and return.
             colouredMap.UnlockBits(mapBmpData);
             return colouredMap;
+        }
+
+        private static int ConvertTo1DArr(int x, int y, int width)
+        {
+            return ((((y * width) + (x + 1)) * 3) - 3);
+        }
+
+        private static Color ReturnColour(int x, int y, int width, byte[] colMapRgbValues)
+        {
+            int bluePos = ((((y * width) + (x + 1)) * 3) - 3);
+            //Remember we're converting from BGR to RGB, so it's reversed (2, 1, 0, not 0, 1, 2)
+            return Color.FromArgb(colMapRgbValues[bluePos + 2], colMapRgbValues[bluePos + 1], colMapRgbValues[bluePos]);
         }
 
         //Makes sure values stay within limits.

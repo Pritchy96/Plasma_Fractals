@@ -46,11 +46,11 @@ namespace Plasma_Fractal
                     #region Noise
                     if (noise)
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, true, 255);
                     }
                     else
                     {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, false, 255);
+                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, true, 255);
                     }
                     #endregion
                 }
@@ -101,13 +101,6 @@ namespace Plasma_Fractal
                 #endregion
             }
             #endregion
-
-            if (coloured)
-            {
-                //for (int i = 0; i < 20; i++)
-                  //  AddRiver();
-            }
-
         }
 
         public void AddRiver()
