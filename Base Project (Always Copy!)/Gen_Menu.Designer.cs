@@ -41,11 +41,13 @@
             this.txtBaseRough = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.txtShaderRough = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.txtRivers = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // btn_Generate
             // 
-            this.btn_Generate.Location = new System.Drawing.Point(25, 249);
+            this.btn_Generate.Location = new System.Drawing.Point(26, 274);
             this.btn_Generate.Name = "btn_Generate";
             this.btn_Generate.Size = new System.Drawing.Size(75, 23);
             this.btn_Generate.TabIndex = 0;
@@ -144,7 +146,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 170);
+            this.label3.Location = new System.Drawing.Point(14, 204);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(91, 13);
             this.label3.TabIndex = 10;
@@ -153,7 +155,7 @@
             // txtBaseRough
             // 
             this.txtBaseRough.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtBaseRough.Location = new System.Drawing.Point(38, 189);
+            this.txtBaseRough.Location = new System.Drawing.Point(38, 223);
             this.txtBaseRough.Name = "txtBaseRough";
             this.txtBaseRough.Size = new System.Drawing.Size(46, 13);
             this.txtBaseRough.TabIndex = 9;
@@ -162,7 +164,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 211);
+            this.label4.Location = new System.Drawing.Point(9, 239);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(101, 13);
             this.label4.TabIndex = 12;
@@ -171,17 +173,38 @@
             // txtShaderRough
             // 
             this.txtShaderRough.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtShaderRough.Location = new System.Drawing.Point(38, 227);
+            this.txtShaderRough.Location = new System.Drawing.Point(38, 255);
             this.txtShaderRough.Name = "txtShaderRough";
             this.txtShaderRough.Size = new System.Drawing.Size(46, 13);
             this.txtShaderRough.TabIndex = 11;
             this.txtShaderRough.Text = "18";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 164);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(93, 13);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "How many Rivers:";
+            // 
+            // txtRivers
+            // 
+            this.txtRivers.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtRivers.Location = new System.Drawing.Point(36, 183);
+            this.txtRivers.Name = "txtRivers";
+            this.txtRivers.Size = new System.Drawing.Size(46, 13);
+            this.txtRivers.TabIndex = 13;
+            this.txtRivers.Text = "4";
+            this.txtRivers.TextChanged += new System.EventHandler(this.txtRivers_TextChanged);
+            // 
             // Gen_Menu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(122, 281);
+            this.ClientSize = new System.Drawing.Size(122, 300);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.txtRivers);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.txtShaderRough);
             this.Controls.Add(this.label3);
@@ -220,6 +243,8 @@
         private System.Windows.Forms.TextBox txtBaseRough;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox txtShaderRough;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox txtRivers;
 
     }
 }

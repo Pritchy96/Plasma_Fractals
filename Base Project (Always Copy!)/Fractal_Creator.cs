@@ -113,14 +113,12 @@ namespace Plasma_Fractal
             }
         }
 
-        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, bool rivers = true, int alpha = 255)
+        public static Bitmap ColourBitmapBW(Bitmap map, Bitmap shaderMap = null, bool noise = true, int rivers = 0, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
 
             #region Rivers
-            if (rivers)
-            {
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < rivers; i++)
                 {
                     Point currentPixel = new Point();
                     Color riverColour = Color.FromArgb(200, 200, 200);
@@ -199,7 +197,6 @@ namespace Plasma_Fractal
                     }
 
                     #endregion
-                }
             }
             #endregion
 
@@ -246,13 +243,7 @@ namespace Plasma_Fractal
             //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
             for (int i = 0; i < mapRgbValues.Length; i += 3)
             {
-                if (mapRgbValues[i] < 50)
-                {
-                    mapRgbValues[i] = 100;
-                    mapRgbValues[i+1] = 100;
-                    mapRgbValues[i+2] = 100;
-                }
-                else if (mapRgbValues[i] < 100)
+                if (mapRgbValues[i] < 100)
                 {
                     mapRgbValues[i]   = 120;
                     mapRgbValues[i+1] = 120;
@@ -276,12 +267,14 @@ namespace Plasma_Fractal
                     mapRgbValues[i + 1] = 180;
                     mapRgbValues[i + 2] = 180;
                 }
+                   
                 else if (mapRgbValues[i] < 150)
                 {
                     mapRgbValues[i] = 200;
                     mapRgbValues[i + 1] = 200;
                     mapRgbValues[i + 2] = 200;
                 }
+                    
                 else if (mapRgbValues[i] < 175)
                 {
                     mapRgbValues[i] = 220;
@@ -336,7 +329,7 @@ namespace Plasma_Fractal
             return colouredMap;
         }
 
-        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, bool rivers = true, int alpha = 255)
+        public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int rivers = 0, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
 
@@ -396,9 +389,7 @@ namespace Plasma_Fractal
             #endregion         
 
             #region Rivers
-            if (rivers)
-            {
-                for (int i = 0; i < 50; i++)
+                for (int i = 0; i < rivers; i++)
                 {
                     Point currentPixel = new Point();
                     Color riverColour = Color.FromArgb(200, 200, 200);
@@ -507,7 +498,6 @@ namespace Plasma_Fractal
                     }
 
                     #endregion
-                }
             }
             #endregion
 
@@ -620,6 +610,7 @@ namespace Plasma_Fractal
             // Unlock the bits and return.
             colouredMap.UnlockBits(colMapBmpData);
             map.UnlockBits(mapBmpData);
+            if (shaderMap != null)
             shaderMap.UnlockBits(shaderBmpData);
 
             return colouredMap;

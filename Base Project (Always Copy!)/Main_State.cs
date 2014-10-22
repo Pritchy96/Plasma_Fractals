@@ -26,79 +26,25 @@ namespace Plasma_Fractal
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
         }
 
-        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int baseRoughness = 24, int shaderRoughness = 18)
+        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 0, int baseRoughness = 24, int shaderRoughness = 18)
         {
             islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
             shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
-            shader = Fractal_Creator.ColourBitmapBW(shader, null, false, false, 255);
+            shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 0, 255);
 
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
             #region Specifying Image parameters (Colour, shade etc)
             if (coloured)   //Colour the island.
-            {
-                #region Shade
-                if (shaded)
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, true, true, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, false, true, 255);
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmap(islandFractal, null, false, false, 255);
-                    }
-                    #endregion
-                }
-                #endregion
+            {          
+               islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, noise, rivers, 255);
             }
             else   //Keep the island Black and White
             {
-                #region Shade
-                if (shaded)
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, false, false, 255);
-                    }
-                    #endregion
-                }
-                else
-                {
-                    #region Noise
-                    if (noise)
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, true, false, 255);
-                    }
-                    else
-                    {
-                        islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, null, false, false, 255);
-                    }
-                    #endregion
-                }
-                #endregion
+                islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, noise, rivers, 255);
             }
             #endregion
         }

@@ -32,16 +32,24 @@ namespace Plasma_Fractal
                 txt_Width.Text = txt_Height.Text;
         }
 
+        private void txtRivers_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void btn_Generate_Click(object sender, EventArgs e)
         {
             try
             {
-                mainState.MakeIsland(int.Parse(txt_Width.Text), int.Parse(txt_Height.Text), chk_Coloured.Checked, chk_Shaded.Checked, chk_Noise.Checked, int.Parse(txtBaseRough.Text), int.Parse(txtShaderRough.Text));
+                mainState.MakeIsland(int.Parse(txt_Width.Text), int.Parse(txt_Height.Text), chk_Coloured.Checked, chk_Shaded.Checked, chk_Noise.Checked, int.Parse(txtRivers.Text), int.Parse(txtBaseRough.Text), int.Parse(txtShaderRough.Text));
             }
             catch (FormatException)
             {
                 MessageBox.Show("Please enter a Width and Height!");
             }
         }
+
+
+
     }
 }
