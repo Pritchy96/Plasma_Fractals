@@ -20,23 +20,26 @@ namespace Plasma_Fractal
         {
             this.islandDisplay = islandDisplay;
 
+            /*
             optionsMenu = new Gen_Menu(this);
             optionsMenu.Show();
             optionsMenu.Owner = islandDisplay;
             optionsMenu.StartPosition = FormStartPosition.Manual;   //Setting StartPosition to Location
+             * */
         }
 
-        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 0, int baseRoughness = 24, int shaderRoughness = 18)
+        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 0, int baseRoughness = 4, int shaderRoughness = 18)
         {
             islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
-            shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
-            shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 0, 255);
+            //shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
+            //shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 0, 255);
 
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
 
+            /*
             #region Specifying Image parameters (Colour, shade etc)
             if (coloured)   //Colour the island.
             {          
@@ -47,6 +50,7 @@ namespace Plasma_Fractal
                 islandColoured = Fractal_Creator.ColourBitmapBW(islandFractal, shader, noise, rivers, 255);
             }
             #endregion
+             * */
         }
 
         public void AddRiver()
@@ -125,6 +129,7 @@ namespace Plasma_Fractal
                 }    
             }
             #endregion
+            
         }
 
         public void Update()
@@ -140,19 +145,14 @@ namespace Plasma_Fractal
         {
             if (e.Button == MouseButtons.Left)
             {
-                heightMap = Fractal_Creator.ColourBitmapHeightMapBW(islandFractal, Fractal_Creator.MakeFractal(islandFractal.Width, islandFractal.Height), false, 255);
-                heightMap.Save("C:/Users/Pritchy/Desktop/HeightMap.bmp", ImageFormat.Bmp);
-                islandColoured.Save("C:/Users/Pritchy/Desktop/ColourMap.bmp", ImageFormat.Bmp);
+                islandFractal.Save("C:/Users/Pritchy/Desktop/HeightMap.bmp", ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
-            }
-            else
-            {
-                // MakeIsland(width, height);
             }
         }
 
         public void ScreenResized()
         {
+            /*
             if (islandDisplay.Bounds.Right + optionsMenu.Width + 5 < Screen.PrimaryScreen.Bounds.Width)
             {
                 optionsMenu.Location = new Point(islandDisplay.Bounds.Right + 5, islandDisplay.Bounds.Top);
@@ -161,13 +161,14 @@ namespace Plasma_Fractal
             {
                 optionsMenu.Location = new Point(Screen.PrimaryScreen.Bounds.Right - optionsMenu.Width, islandDisplay.Bounds.Top);
             }
+             * */
 
         }
 
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(islandColoured, Point.Empty);
+            e.Graphics.DrawImage(islandFractal, Point.Empty);
         }
     }
 }
