@@ -15,10 +15,14 @@ namespace Plasma_Fractal
         private static Random rand = new Random();
         private static double roughness = 0;    //Increase to create smaller "islands"
         private static double screenSize = 0;   //Width + Height of screen.
+        private static double maxDistance = 0, centerX, centerY;
 
         public static Bitmap MakeFractal(int width, int height, int Roughness = 13)
         {
             screenSize = width + height;
+            centerX = width / 2;
+            centerY = height / 2;
+            maxDistance = Math.Sqrt((Math.Pow(centerX, 2)) + (Math.Pow(centerY, 2)));
             roughness = Roughness;
 
             Bitmap bitmap = new Bitmap(width, height);
@@ -102,14 +106,45 @@ namespace Plasma_Fractal
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
             {
-                //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
-                double finalVal = (c1 + c2 + c3 + c4) / 4;
-
                 //Calculate where the position of the blue (remember BGR not RGB) byte for the pixel at positon (X, Y) on the bitmap image is in the 1D byte array.
                 int bytePosition = ((int) (((int)y * bitmapWidth) + (int)x) * 3);
+                double distX = Math.Abs(x - centerX), distY = Math.Abs(y - centerY);
+                double distance = Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));
+
+                //Average the points of the pixel sized rectangle down into a single number, which is that pixels final gradientValue.
+                double heightValue = (c1 + c2 + c3 + c4) / 4;   //Height value generated from random plasma noise.
+                byte gradientValue = (byte)((distance / maxDistance)*255);  //Gradient used to get an island shape
+                int gradientStrength = 255; //how prevalent the gradient is in the final value. Keep high. Out of 255.
+                int heightStrength = 125;   //How prevalant the heightmap is in the final value. Should be kept lower.
+                int offset = 90;    //Offset used to make boost the value to make bigger islands. Reduce for smaller islands.
+
+                byte finalValue = (byte)((heightStrength * heightValue) + (gradientValue * gradientStrength) + offset);
+
+                //Keep value between 0 and 255
+                if (finalValue > 109 || distance > maxDistance - 50)    //If we're high enough to be considered ocean or close to the edge.
+                {
+                    //If we're close to the center and it's going to be water, instead make it land.  
+                    if (distance < 150)
+                    {
+                        //finalValue = 0;
+                        finalValue = (byte)Math.Min(255, (finalValue + (int)(((float)finalValue / 255) * rand.Next(-5, 5))));
+                    }
+                    else //Otherwise make it sea.
+                    {
+                        finalValue = 0;
+                    }
+                }
+                else
+                {
+
+                    finalValue = (byte)Math.Min(255, (finalValue + (int)(((float)finalValue / 255) * rand.Next(-5, 5))));
+                }
+
+
+
 
                 //Only needs to set one of the RGB values in the byte array as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
-                mapRgbValues[bytePosition] = (byte) (finalVal * 255);
+                mapRgbValues[bytePosition] = finalValue;
             }
         }
 
@@ -150,7 +185,7 @@ namespace Plasma_Fractal
                             break;
                         }
 
-                        bestValue = 0;  //reset the highest value each iteration.
+                        bestValue = 0;  //reset the highest gradientValue each iteration.
 
                         if (map.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && colouredMap.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != riverColour.ToArgb())
                         {
@@ -240,7 +275,7 @@ namespace Plasma_Fractal
             #endregion
       
             #region Colour Selecting.
-            //Only need to do the B value, not R or B as it's grey (RGB are all the same value).
+            //Only need to do the B gradientValue, not R or B as it's grey (RGB are all the same gradientValue).
             for (int i = 0; i < mapRgbValues.Length; i += 3)
             {
                 if (mapRgbValues[i] < 100)
@@ -392,7 +427,7 @@ namespace Plasma_Fractal
                 for (int i = 0; i < rivers; i++)
                 {
                     Point currentPixel = new Point();
-                    Color riverColour = Color.FromArgb(200, 200, 200);
+                    Color riverColour = Color.FromArgb(10, 10, 10);
                     Color pixelColour;
 
                     //The lightest (lowest height) direction.
@@ -408,8 +443,10 @@ namespace Plasma_Fractal
                         currentPixel.X = rand.Next(10, map.Width - 10);
                         currentPixel.Y = rand.Next(10, map.Height - 10);
                     }
-                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B > 150);  //Choose a position which is on high land. (blue heightmap)
+                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B < 150);  //Choose a position which is on high land. (blue heightmap)
 
+
+                    Console.WriteLine("Found Mountain!");
                     //Colour the starting location.
                     colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y, map.Width)] = riverColour.B;
                     colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y, map.Width) + 1] = riverColour.G;
@@ -417,7 +454,7 @@ namespace Plasma_Fractal
                     #endregion
 
                     #region Carve River
-                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B < 155)  //While we're not at sea level..
+                    while (ReturnColour(currentPixel.X, currentPixel.Y, map.Width, mapRgbValues).B > 8)  //While we're not at sea level..
                     {
                         //Stop if at edge of screen.
                         if (currentPixel.Y - 1 < 0 || currentPixel.X - 1 < 0 || currentPixel.Y + 1 >= colouredMap.Height || currentPixel.X + 1 >= colouredMap.Width)
@@ -425,42 +462,46 @@ namespace Plasma_Fractal
                             break;
                         }
 
-                        bestValue = 0;  //reset the highest value each iteration.
+                        Point delta = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y); //direction we're going in (straight line)
+                        bestValue = 0;  //reset the highest gradientValue each iteration.
 
-                        #region Checking around currentPixel for steepest drop.
-                        pixelColour = ReturnColour(currentPixel.X, currentPixel.Y - 1, map.Width, colMapRgbValues); //Colour of pixel we're looking at.
-                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)] > bestValue && //If this is the steepest drop...
-                             pixelColour != riverColour)    //And it's not already a river pixel..
+                        Point sameDir = new Point(currentPixel.X + delta.X, currentPixel.Y + delta.Y);
+                        if (ReturnColour(sameDir.X, sameDir.Y, map.Width, colMapRgbValues).B > ReturnColour(currentPixel.X, currentPixel.Y, map.Width, colMapRgbValues).B + 2)
                         {
-                            bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)];
-                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
-                        }
+                            #region Checking around currentPixel for steepest drop.
+                            pixelColour = ReturnColour(currentPixel.X, currentPixel.Y - 1, map.Width, colMapRgbValues); //Colour of pixel we're looking at.
+                            if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)] > bestValue && //If this is the steepest drop...
+                                 pixelColour != riverColour)    //And it's not already a river pixel..
+                            {
+                                bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y - 1, map.Width)];
+                                bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y - 1);
+                            }
 
-                        pixelColour = ReturnColour(currentPixel.X, currentPixel.Y + 1, map.Width, colMapRgbValues);
-                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)] > bestValue 
-                            && pixelColour != riverColour)
-                        {
-                            bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)];
-                            bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
-                        }
+                            pixelColour = ReturnColour(currentPixel.X, currentPixel.Y + 1, map.Width, colMapRgbValues);
+                            if (mapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)] > bestValue
+                                && pixelColour != riverColour)
+                            {
+                                bestValue = colMapRgbValues[ConvertTo1DArr(currentPixel.X, currentPixel.Y + 1, map.Width)];
+                                bestDirectionPoint = new Point(currentPixel.X, currentPixel.Y + 1);
+                            }
 
-                        pixelColour = ReturnColour(currentPixel.X - 1, currentPixel.Y, map.Width, colMapRgbValues);
-                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)] > bestValue 
-                            && pixelColour != riverColour)
-                        {
-                            bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)];
-                            bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
-                        }
+                            pixelColour = ReturnColour(currentPixel.X - 1, currentPixel.Y, map.Width, colMapRgbValues);
+                            if (mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)] > bestValue
+                                && pixelColour != riverColour)
+                            {
+                                bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X - 1, currentPixel.Y, map.Width)];
+                                bestDirectionPoint = new Point(currentPixel.X - 1, currentPixel.Y);
+                            }
 
-                        pixelColour = ReturnColour(currentPixel.X + 1, currentPixel.Y, map.Width, colMapRgbValues);
-                        if (mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)] > bestValue
-                            && pixelColour != riverColour)
-                        {
-                            bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)];
-                            bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
+                            pixelColour = ReturnColour(currentPixel.X + 1, currentPixel.Y, map.Width, colMapRgbValues);
+                            if (mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)] > bestValue
+                                && pixelColour != riverColour)
+                            {
+                                bestValue = mapRgbValues[ConvertTo1DArr(currentPixel.X + 1, currentPixel.Y, map.Width)];
+                                bestDirectionPoint = new Point(currentPixel.X + 1, currentPixel.Y);
+                            }
+                            #endregion
                         }
-                        #endregion
-
                         //If there is no where which has not been visited around us, 
                         //This will be repeated until we can move somewhere.
                         if (bestValue == 0)
@@ -469,7 +510,7 @@ namespace Plasma_Fractal
                             try
                             {
                                 //Find direction we're going in (the direction we went last time).
-                                Point delta = new Point(bestDirectionPoint.X - lastMove.X, bestDirectionPoint.Y - lastMove.Y); //direction we're going in (straight line)
+                                
                                 bestDirectionPoint.X = currentPixel.X + delta.X; //Move along the straight line one pixel.
                                 bestDirectionPoint.Y = currentPixel.Y + delta.Y;
                                 currentPixel.X += delta.X; //Move along the straight line one pixel.
@@ -505,85 +546,70 @@ namespace Plasma_Fractal
             //Is in the format BGR, NOT RGB!!!
             for (int i = 0; i < colMapRgbValues.Length; i += 3)
             {
-                //Snow Peak
-                if (colMapRgbValues[i] < 10)
-                {
-                    colMapRgbValues[i] = 175;    //Blue component
-                    colMapRgbValues[i + 1] = 181;   //Green Component
-                    colMapRgbValues[i + 2] = 174;   //Red Component
-                }
-                //High Mountains
-                else if (colMapRgbValues[i] < 25)
-                {
-                    colMapRgbValues[i] = 130;
-                    colMapRgbValues[i + 1] = 131;
-                    colMapRgbValues[i + 2] = 149;
-                }
-                //Low Mountains
-                else if (colMapRgbValues[i] < 50)
-                {
-                    colMapRgbValues[i] = 99;
-                    colMapRgbValues[i + 1] = 102;
-                    colMapRgbValues[i + 2] = 102;
-                }
+                double heightModifier = shaderRgbValues[i];
 
-                //Dark grass
-                else if (colMapRgbValues[i] < 70)
-                {
-                    colMapRgbValues[i] = 48;
-                    colMapRgbValues[i + 1] = 79;
-                    colMapRgbValues[i + 2] = 40;
-                }
-                //Light Grass
-                else if (colMapRgbValues[i] < 145)
-                {
-                    colMapRgbValues[i] = 60;
-                    colMapRgbValues[i + 1] = 95;
-                    colMapRgbValues[i + 2] = 48;
-                }
-                //Shore 1 - Inner Light Sand
-                else if (colMapRgbValues[i] < 150)
-                {
-                    colMapRgbValues[i] = 110;
-                    colMapRgbValues[i + 1] = 163;
-                    colMapRgbValues[i + 2] = 140;
-                }
-                //Shore 2 - Outer Dark Sand
-                else if (colMapRgbValues[i] < 148)
-                {
-                    colMapRgbValues[i] = 227;
-                    colMapRgbValues[i + 1] = 227;
-                    colMapRgbValues[i + 2] = 10;
-                }
-                //Shore 3 - Water
-                else if (colMapRgbValues[i] < 155)
-                {
-                    colMapRgbValues[i] = 122;
-                    colMapRgbValues[i + 1] = 96;
-                    colMapRgbValues[i + 2] = 10;
-                }
-                //Reef
-                else if (colMapRgbValues[i] < 170)
-                {
-                    colMapRgbValues[i] = 95;
-                    colMapRgbValues[i + 1] = 71;
-                    colMapRgbValues[i + 2] = 38;
-                }
                 //Sea
-                else if (colMapRgbValues[i] < 200)
+                if (colMapRgbValues[i] < 10)
                 {
                     colMapRgbValues[i] = 73;
                     colMapRgbValues[i + 1] = 60;
                     colMapRgbValues[i + 2] = 38;
                 }
-                //Deep Sea
-                else
+                //Shore 2 - Outer Dark Sand
+                else if (colMapRgbValues[i] < 11)
                 {
-                    colMapRgbValues[i] = 78;
-                    colMapRgbValues[i + 1] = 59;
-                    colMapRgbValues[i + 2] = 40;
+                    colMapRgbValues[i] = 18;
+                    colMapRgbValues[i + 1] = 104;
+                    colMapRgbValues[i + 2] = 141;
+                }
+                //Shore 1 - Inner Light Sand
+                else if (colMapRgbValues[i] < 14)
+                {
+                    colMapRgbValues[i] = 27;
+                    colMapRgbValues[i + 1] = 140;
+                    colMapRgbValues[i + 2] = 190;
+                }
+                //Light Grass
+                else if (colMapRgbValues[i] < 105)
+                {
+                    colMapRgbValues[i] = (byte)(60);
+                    colMapRgbValues[i + 1] = (byte)(95);
+                    colMapRgbValues[i + 2] = (byte)(48);
+                }
+                //Light Grass
+                else if (colMapRgbValues[i] < 105)
+                {
+                    colMapRgbValues[i] = (byte) (60 * ((heightModifier) / 105));
+                    colMapRgbValues[i + 1] = (byte)(95 * ((heightModifier) / 105));
+                    colMapRgbValues[i + 2] = (byte)(48 * ((heightModifier) / 105));
+                }
+                //Low Mountains
+                else if (colMapRgbValues[i] < 130)
+                {
+                    colMapRgbValues[i] = 99;
+                    colMapRgbValues[i + 1] = 102;
+                    colMapRgbValues[i + 2] = 102;
+                }
+                //High Mountains
+                else if (colMapRgbValues[i] < 155)
+                {
+
+                    colMapRgbValues[i] = 130;
+                    colMapRgbValues[i + 1] = 131;
+                    colMapRgbValues[i + 2] = 149;
+                }
+                //Mountain Top.
+                else 
+                {
+                    colMapRgbValues[i] = 175;    //Blue component
+                    colMapRgbValues[i + 1] = 181;   //Green Component
+                    colMapRgbValues[i + 2] = 174;   //Red Component
                 }
 
+
+
+
+                /*
                 #region Shading.
                 if (shaderMap != null)  //Interpolating the coloured map with another (black and white, so R = G = B) fractal to give it texture.
                 {
@@ -591,16 +617,19 @@ namespace Plasma_Fractal
                     colMapRgbValues[i + 1] = (byte)Math.Min(255, (int)(colMapRgbValues[i + 1] * ((float)shaderRgbValues[i] / 180)));
                     colMapRgbValues[i + 2] = (byte)Math.Min(255, (int)(colMapRgbValues[i + 2] * ((float)shaderRgbValues[i] / 180)));
                 }
+                 
                 #endregion
-
+                 * */
+                
                 #region Noise Adding.
                 if (noise)  //Displacing the pixel colour by a random amount.
                 {
-                    colMapRgbValues[i] = (byte)Math.Min(255, (colMapRgbValues[i] + (int)(((float)colMapRgbValues[i] / 255) * rand.Next(-60, 60))));
-                    colMapRgbValues[i + 1] = (byte)Math.Min(255, (colMapRgbValues[i + 1] + (int)(((float)colMapRgbValues[i + 1] / 255) * rand.Next(-60, 60))));
-                    colMapRgbValues[i + 2] = (byte)Math.Min(255, (colMapRgbValues[i + 2] + (int)(((float)colMapRgbValues[i + 2] / 255) * rand.Next(-60, 60))));
+                    colMapRgbValues[i] = (byte)Math.Min(255, (colMapRgbValues[i] + (int)(((float)colMapRgbValues[i] / 255) * rand.Next(-40, 40))));
+                    colMapRgbValues[i + 1] = (byte)Math.Min(255, (colMapRgbValues[i + 1] + (int)(((float)colMapRgbValues[i + 1] / 255) * rand.Next(-40, 40))));
+                    colMapRgbValues[i + 2] = (byte)Math.Min(255, (colMapRgbValues[i + 2] + (int)(((float)colMapRgbValues[i + 2] / 255) * rand.Next(-40, 40))));
                 }
                 #endregion
+                 
             }
             #endregion
 
@@ -802,7 +831,7 @@ namespace Plasma_Fractal
                 return num;
         }
 
-        //Displaces value a small amount.
+        //Displaces gradientValue a small amount.
         private static double Displace(double rectSize)
         {
             double Max = rectSize / screenSize * roughness;
@@ -847,70 +876,70 @@ namespace Plasma_Fractal
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
             {
-                //Average the points of the pixel sized rectangle down into a single number, which is that pixels final value.
-                double finalVal = (c1 + c2 + c3 + c4) / 4;
+                //Average the points of the pixel sized rectangle down into a single number, which is that pixels final gradientValue.
+                double heightValue = (c1 + c2 + c3 + c4) / 4;
 
                 if (coloured)
                     //places the current pixel we are working with to within the image.
-                    bitmap.SetPixel((int)x, (int)y, GenColour((int)(finalVal * 255)));
+                    bitmap.SetPixel((int)x, (int)y, GenColour((int)(heightValue * 255)));
                 else
                     //places the current pixel we are working with to within the image.
-                    bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(finalVal * 255)));
+                    bitmap.SetPixel((int)x, (int)y, GenColourBWShader((int)(heightValue * 255)));
             }
         }*/
 
 /*
-        private static Color GenColourBWTrans(int value)
+        private static Color GenColourBWTrans(int gradientValue)
         {
             int transparency = 100; //Val between 0 and 255.
 
             //Snow Peak
-            if (value < 10)
+            if (gradientValue < 10)
             {
                 return Color.FromArgb(transparency, 250, 250, 250);
             }
             //High Mountains
-            else if (value < 25)
+            else if (gradientValue < 25)
             {
                 return Color.FromArgb(transparency, 240, 240, 240);
             }
             //Low Mountains
-            else if (value < 50)
+            else if (gradientValue < 50)
             {
                 return Color.FromArgb(transparency, 230, 230, 230);
             }
             //Dark grass
-            else if (value < 70)
+            else if (gradientValue < 70)
             {
                 return Color.FromArgb(transparency, 220, 220, 220);
             }
             //Light Grass
-            else if (value < 145)
+            else if (gradientValue < 145)
             {
                 return Color.FromArgb(transparency, 210, 210, 210);
             }
             //Shore 1 - Inner Light Sand
-            else if (value < 150)
+            else if (gradientValue < 150)
             {
                 return Color.FromArgb(transparency, 200, 200, 200);
             }
             //Shore 2 - Outer Dark Sand
-            // else if (value < 148)
+            // else if (gradientValue < 148)
             // {
             //     return Color.FromArgb(217, 217, 0);
             //}
             //Shore 3 - Water
-            else if (value < 155)
+            else if (gradientValue < 155)
             {
                 return Color.FromArgb(transparency, 190, 190, 190);
             }
             //Reef
-            else if (value < 170)
+            else if (gradientValue < 170)
             {
                 return Color.FromArgb(transparency, 180, 180, 180);
             }
             //Sea
-            else if (value < 200)
+            else if (gradientValue < 200)
             {
                 return Color.FromArgb(transparency, 170, 170, 170);
             }
@@ -921,55 +950,55 @@ namespace Plasma_Fractal
             }
         }
 
-        private static Color GenColourOld(int value)
+        private static Color GenColourOld(int gradientValue)
         {
             //Snow Peak
-            if (value < 10)
+            if (gradientValue < 10)
             {
                 return Color.FromArgb(245, 245, 245);
             }
             //High Mountains
-            else if (value < 25)
+            else if (gradientValue < 25)
             {
                 return Color.FromArgb(169, 169, 169);
             }
             //Low Mountains
-            else if (value < 50)
+            else if (gradientValue < 50)
             {
                 return Color.FromArgb(128, 128, 128);
             }
             //Dark grass
-            else if (value < 70)
+            else if (gradientValue < 70)
             {
                 return Color.FromArgb(0, 100, 0);
             }
             //Light Grass
-            else if (value < 145)
+            else if (gradientValue < 145)
             {
                 return Color.FromArgb(8, 128, 0);
             }
             //Shore 1 - Inner Light Sand
-            else if (value < 150)
+            else if (gradientValue < 150)
             {
                 return Color.FromArgb(227, 227, 69);
             }
             //Shore 2 - Outer Dark Sand
-            else if (value < 148)
+            else if (gradientValue < 148)
             {
                 return Color.FromArgb(217, 217, 0);
             }
             //Shore 3 - Water
-            else if (value < 155)
+            else if (gradientValue < 155)
             {
                 return Color.FromArgb(0, 178, 178);
             }
             //Reef
-            else if (value < 170)
+            else if (gradientValue < 170)
             {
                 return Color.FromArgb(0, 163, 217);
             }
             //Sea
-            else if (value < 200)
+            else if (gradientValue < 200)
             {
                 return Color.FromArgb(0, 133, 178);
             }
@@ -989,56 +1018,56 @@ namespace Plasma_Fractal
             {
                 for (int j = 0; j < map.Height; j++)
                 {
-                    int value = map.GetPixel(i, j).R;    //Could also be B or G, it's grey so all equal
+                    int gradientValue = map.GetPixel(i, j).R;    //Could also be B or G, it's grey so all equal
                     Color colour;
 
                     //Snow Peak
-                    if (value < 10)
+                    if (gradientValue < 10)
                     {
                         colour = Color.FromArgb(174, 181, 175);
                     }
                     //High Mountains
-                    else if (value < 25)
+                    else if (gradientValue < 25)
                     {
                         colour = Color.FromArgb(149, 131, 130);
                     }
                     //Low Mountains
-                    else if (value < 50)
+                    else if (gradientValue < 50)
                     {
                         colour = Color.FromArgb(102, 102, 99);
                     }
                     //Dark grass
-                    else if (value < 70)
+                    else if (gradientValue < 70)
                     {
                         colour = Color.FromArgb(40, 79, 48);
                     }
                     //Light Grass
-                    else if (value < 145)
+                    else if (gradientValue < 145)
                     {
                         colour = Color.FromArgb(48, 95, 60);
                     }
                     //Shore 1 - Inner Light Sand
-                    else if (value < 150)
+                    else if (gradientValue < 150)
                     {
                         colour = Color.FromArgb(140, 163, 110);
                     }
                     //Shore 2 - Outer Dark Sand
-                    else if (value < 148)
+                    else if (gradientValue < 148)
                     {
                         colour = Color.FromArgb(227, 227, 10);
                     }
                     //Shore 3 - Water
-                    else if (value < 155)
+                    else if (gradientValue < 155)
                     {
                         colour = Color.FromArgb(10, 96, 122);
                     }
                     //Reef
-                    else if (value < 170)
+                    else if (gradientValue < 170)
                     {
                         colour = Color.FromArgb(38, 71, 95);
                     }
                     //Sea
-                    else if (value < 200)
+                    else if (gradientValue < 200)
                     {
                         colour = Color.FromArgb(38, 60, 73);
                     }

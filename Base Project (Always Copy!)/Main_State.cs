@@ -28,22 +28,22 @@ namespace Plasma_Fractal
              * */
         }
 
-        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 0, int baseRoughness = 4, int shaderRoughness = 18)
+        public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 5, int baseRoughness = 4, int shaderRoughness = 18)
         {
             islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
-            //shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
+            shader = Fractal_Creator.MakeFractal(width, height, shaderRoughness);
             //shader = Fractal_Creator.ColourBitmapBW(shader, null, false, 0, 255);
 
             islandFractal = Fractal_Creator.MakeFractal(width, height, baseRoughness);
-
+            islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, noise, rivers, 255);
             /*
             #region Specifying Image parameters (Colour, shade etc)
             if (coloured)   //Colour the island.
             {          
-               islandColoured = Fractal_Creator.ColourBitmap(islandFractal, shader, noise, rivers, 255);
+               
             }
             else   //Keep the island Black and White
             {
@@ -83,7 +83,7 @@ namespace Plasma_Fractal
                 {
                     break;
                 }
-                bestValue = 0;  //reset the highest value each iteration.
+                bestValue = 0;  //reset the highest gradientValue each iteration.
 
                 if (islandFractal.GetPixel(currentPixel.X, currentPixel.Y - 1).B > bestValue && islandColoured.GetPixel(currentPixel.X, currentPixel.Y - 1).ToArgb() != Color.DarkBlue.ToArgb())
                 {
@@ -146,6 +146,7 @@ namespace Plasma_Fractal
             if (e.Button == MouseButtons.Left)
             {
                 islandFractal.Save("C:/Users/Pritchy/Desktop/HeightMap.bmp", ImageFormat.Bmp);
+                islandColoured.Save("C:/Users/Pritchy/Desktop/colour.bmp", ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
             }
         }
@@ -168,7 +169,7 @@ namespace Plasma_Fractal
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(islandFractal, Point.Empty);
+            e.Graphics.DrawImage(islandColoured, Point.Empty);
         }
     }
 }
