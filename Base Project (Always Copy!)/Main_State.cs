@@ -11,7 +11,7 @@ namespace Plasma_Fractal
 {
     public class Main_State
     {
-        Bitmap islandFractal, islandShape, temperateFractal, heightFractal;
+        Bitmap islandFractal, islandShape, temperateFractal, heightFractal, rainFractal, islandColoured, gradientMap;
         Island_Display islandDisplay;
         Gen_Menu optionsMenu;
         Random rand = new Random();
@@ -37,9 +37,13 @@ namespace Plasma_Fractal
             islandFractal = Fractal_Creator.MakeFractal(width, height, 12); 
             islandShape = Fractal_Creator.ShapeIsland(islandFractal);
 
-            temperateFractal = Fractal_Creator.MakeFractal(width, height, 20);
-            heightFractal = Fractal_Creator.MakeFractal(width, height, 30);
-           
+            temperateFractal = Fractal_Creator.MakeFractal(width, height, 12, 40, 0);
+            heightFractal = Fractal_Creator.MakeFractal(width, height, 12);
+            rainFractal = Fractal_Creator.MakeFractal(width, height, 12, 225, 0);
+            gradientMap = Fractal_Creator.CalculateGradient(width, height, 255, 0);
+
+            heightFractal = Fractal_Creator.InterpolateBitmaps(heightFractal, gradientMap, 0.3, 0.9);
+            islandColoured = Fractal_Creator.CalculateBiomes(islandFractal, islandShape, heightFractal, temperateFractal, rainFractal);
         }
 
         public void Update()
@@ -81,7 +85,7 @@ namespace Plasma_Fractal
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(islandShape, Point.Empty);
+            e.Graphics.DrawImage(heightFractal, Point.Empty);
         }
     }
 }

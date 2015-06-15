@@ -17,7 +17,7 @@ namespace Plasma_Fractal
         private static double screenSize = 0;   //Width + Height of screen.
         private static double maxDistance = 0, centerX, centerY;
 
-        public static Bitmap MakeFractal(int width, int height, int Roughness = 13)
+        public static Bitmap MakeFractal(int width, int height, int Roughness = 13, int maxValue = 255, int minValue = 0)
         {
             screenSize = width + height;
             centerX = width / 2;
@@ -50,7 +50,7 @@ namespace Plasma_Fractal
             double c4 = rand.NextDouble();
 
             //Call Divide, begin the iteration.
-            Divide(mapRgbValues, width, 0, 0, width, height, c1, c2, c3, c4);
+            Divide(mapRgbValues, width, 0, 0, width, height, c1, c2, c3, c4, minValue, maxValue);
 
             // Copy the RGB values back to the bitmap
             System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
@@ -72,7 +72,8 @@ namespace Plasma_Fractal
         /// <param name="c2"></param>
         /// <param name="c3"></param>
         /// <param name="c4"></param>
-        private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1, double c2, double c3, double c4)
+        private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1,
+            double c2, double c3, double c4, int minValue, int maxValue)
         {
             //X and Y are the old c1 coordinates from the last recursive iteration.
 
@@ -98,20 +99,20 @@ namespace Plasma_Fractal
                 mid4 = Round((c3 + c4) / 2);
 
                 //Call divide to calculate the middle of the new rectangles.
-                Divide(mapRgbValues, bitmapWidth, x, y, newWidth, newHeight, c1, mid1, mid2, middle);
-                Divide(mapRgbValues, bitmapWidth, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3);
-                Divide(mapRgbValues, bitmapWidth, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4);
-                Divide(mapRgbValues, bitmapWidth, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4);
+                Divide(mapRgbValues, bitmapWidth, x, y, newWidth, newHeight, c1, mid1, mid2, middle, minValue, maxValue);
+                Divide(mapRgbValues, bitmapWidth, x + newWidth, y, width - newWidth, newHeight, mid1, c2, middle, mid3, minValue, maxValue);
+                Divide(mapRgbValues, bitmapWidth, x, y + newHeight, newWidth, height - newHeight, mid2, middle, c3, mid4, minValue, maxValue);
+                Divide(mapRgbValues, bitmapWidth, x + newWidth, y + newHeight, width - newWidth, height - newHeight, middle, mid3, mid4, c4, minValue, maxValue);
             }
             //If our rectangles are now 1px x 1px, we are ready to calculate final values and draw.
             else
-            {
+            {   
                 //Calculate where the position of the blue (remember BGR not RGB) byte for the pixel at positon (X, Y) on the bitmap image is in the 1D byte array.
                 int bytePosition = ConvertTo1DArr((int)x, (int)y, bitmapWidth);
                 //Average the points of the pixel sized rectangle down into a single number, which is that pixels final gradientValue.
                 double heightValue = (c1 + c2 + c3 + c4) / 4;   //Height value generated from random plasma noise.
                 //Only needs to set one of the RGB values in the byte array as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
-                mapRgbValues[bytePosition] = (byte)(heightValue * 255);
+                mapRgbValues[bytePosition] = (byte)((heightValue * (maxValue - minValue)) - minValue);
             }
         }
       
@@ -189,7 +190,38 @@ namespace Plasma_Fractal
             return bitmap;
         }
 
-        public static void CalculateBiomes(Bitmap islandFractal, Bitmap islandShape, Bitmap heightFractal, Bitmap tempFractal, Bitmap RainFractal)
+        public static Bitmap CalculateGradient(int width, int height, int maxValue, int minValue)
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+
+            // Lock the bitmap's bits.  
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData mapBmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr mapPtr = mapBmpData.Scan0;
+            int mapBytes = Math.Abs(mapBmpData.Stride) * bitmap.Height;
+            byte[] mapRgbValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(mapPtr, mapRgbValues, 0, mapBytes);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    //Calculate where the position of the blue (remember BGR not RGB) byte for the pixel at positon (X, Y) on the bitmap image is in the 1D byte array.
+                    int i = ConvertTo1DArr((int)x, (int)y, width);    //Convert to a 1D array from x, y position.
+                    double distX = Math.Abs(x - centerX), distY = Math.Abs(y - centerY);    //Distance fron center in x and y.
+                    double distance = Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));   //Distance from center.
+
+                    mapRgbValues[i] = (byte)((distance/maxDistance)*255);
+                }
+            }
+            // Copy the RGB values back to the bitmap
+            System.Runtime.InteropServices.Marshal.Copy(mapRgbValues, 0, mapPtr, mapBytes);
+            // Unlock the bits and return.
+            bitmap.UnlockBits(mapBmpData);
+            return bitmap;
+        }
+
+        public static Bitmap CalculateBiomes(Bitmap islandFractal, Bitmap islandShape, Bitmap heightFractal, Bitmap tempFractal, Bitmap RainFractal)
         {
             Bitmap colouredIsland = new Bitmap(islandFractal.Width, islandFractal.Height);
 
@@ -201,7 +233,8 @@ namespace Plasma_Fractal
                 islandShapeData = islandShape.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
                 heightFractalData = heightFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
                 tempFractalData = tempFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
-                rainFractalData = RainFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                rainFractalData = RainFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                colouredIslandData = colouredIsland.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             int mapBytes = Math.Abs(islandFractalData.Stride) * islandFractal.Height;
 
@@ -226,29 +259,49 @@ namespace Plasma_Fractal
             IntPtr rainFractalPtr = rainFractalData.Scan0;
             byte[] rainFractalRbgValues = new byte[mapBytes];
             System.Runtime.InteropServices.Marshal.Copy(rainFractalPtr, rainFractalRbgValues, 0, mapBytes);
+
+            IntPtr colouredIslandFractalPtr = colouredIslandData.Scan0;
+            byte[] colouredIslandRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(colouredIslandFractalPtr, colouredIslandRbgValues, 0, mapBytes);
             #endregion
 
             for (int x = 0; x < islandFractal.Width; x++)
             {
                 for (int y = 0; y < islandFractal.Height; y++)
                 {
-                    int bytePosition = ConvertTo1DArr(x, y, islandFractal.Width);
+                    int i = ConvertTo1DArr(x, y, islandFractal.Width);
 
-                    if (islandShapeRbgValues[bytePosition] == 255)  //Land
+                    if (islandShapeRbgValues[i] == 255)  //Land
                     {
-                        if (heightFractalRbgValues[bytePosition] < 150) //Low areas
+                        if (heightFractalRbgValues[i] < 190) //Low areas
                         {
-                            //Follow Whittaker here.
+                            if (rainFractalRbgValues[i] < 30 && tempFractalRbgValues[i] > 10)
+                            {
+                                colouredIslandRbgValues[i] = 18;
+                                colouredIslandRbgValues[i + 1] = 104;
+                                colouredIslandRbgValues[i + 2] = 141;
+                            }
+                            else
+                            {
+                                //Follow Whittaker here.
+                                colouredIslandRbgValues[i] = (byte)(60);
+                                colouredIslandRbgValues[i + 1] = (byte)(95);
+                                colouredIslandRbgValues[i + 2] = (byte)(48);
+                            }
                         }
                         else //Mountains
                         {
-                            
+                            colouredIslandRbgValues[i] = 130;
+                            colouredIslandRbgValues[i + 1] = 131;
+                            colouredIslandRbgValues[i + 2] = 149;
                         }
 
                     }
                     else //Sea
                     {
-                        
+                        colouredIslandRbgValues[i] = 73;
+                        colouredIslandRbgValues[i + 1] = 60;
+                        colouredIslandRbgValues[i + 2] = 38;
                     }
                 }
             }
@@ -259,13 +312,15 @@ namespace Plasma_Fractal
             System.Runtime.InteropServices.Marshal.Copy(islandShapeRbgValues, 0, islandShapePtr, mapBytes);
             System.Runtime.InteropServices.Marshal.Copy(heightFractalRbgValues, 0, heightFractalPtr, mapBytes);
             System.Runtime.InteropServices.Marshal.Copy(tempFractalRbgValues, 0, tempFractalPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(colouredIslandRbgValues, 0, colouredIslandFractalPtr, mapBytes);
 
             islandFractal.UnlockBits(islandFractalData);
             islandShape.UnlockBits(islandShapeData);
             heightFractal.UnlockBits(heightFractalData);
             tempFractal.UnlockBits(tempFractalData);
+            colouredIsland.UnlockBits(colouredIslandData);
             #endregion
-
+            return colouredIsland;
         }
 
         public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int rivers = 0, int alpha = 255)
@@ -547,6 +602,67 @@ namespace Plasma_Fractal
             shaderMap.UnlockBits(shaderBmpData);
 
             return colouredMap;
+        }
+
+        public static Bitmap InterpolateBitmaps(Bitmap bmp1, Bitmap bmp2, double bmp1Coeff = 0.5, double bmp2Coeff = 0.5, int offset = 0)
+        {
+            Bitmap newBmp = new Bitmap(bmp1.Width, bmp1.Height);
+
+            //All the bitmaps are the same size, so just use bmp1 height and width for all.
+            Rectangle rect = new Rectangle(0, 0, bmp1.Width, bmp1.Height);
+
+            #region Locking Bitmaps
+            //Lock all the bitmaps
+            BitmapData bmp1Data = bmp1.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                bmp2Data = bmp2.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                newBmpData = newBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            int mapBytes = Math.Abs(bmp1Data.Stride) * bmp1.Height;
+
+            
+            //This is explained in the MakeFractal Method.
+            IntPtr bmp1Ptr = bmp1Data.Scan0;
+            byte[] bmp1RbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(bmp1Ptr, bmp1RbgValues, 0, mapBytes);
+
+            IntPtr bmp2Ptr = bmp2Data.Scan0;
+            byte[] bmp2RbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(bmp2Ptr, bmp2RbgValues, 0, mapBytes);
+
+            IntPtr newBmpPtr = newBmpData.Scan0;
+            byte[] newBmpRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(newBmpPtr, newBmpRbgValues, 0, mapBytes);
+            #endregion
+
+            for (int x = 0; x < bmp1.Width; x++)
+            {
+                for (int y = 0; y < bmp1.Height; y++)
+                {
+                    int i = ConvertTo1DArr(x, y, bmp1.Width);
+                    Byte val = (byte)(((double)bmp1RbgValues[i] * bmp1Coeff) - ((double)bmp2RbgValues[i] * bmp2Coeff) + offset);
+
+                    if (val > 255)
+                    {
+                        val = 255;
+                    }
+                    else if (val < 0)
+                    {
+                        val = 0;
+                    }
+
+                    newBmpRbgValues[i] = val;
+                }
+            }
+            #region Unlocking Bitmaps
+            System.Runtime.InteropServices.Marshal.Copy(newBmpRbgValues, 0, newBmpPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(bmp1RbgValues, 0, bmp1Ptr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(bmp2RbgValues, 0, bmp2Ptr, mapBytes);
+
+            bmp1.UnlockBits(bmp1Data);
+            bmp2.UnlockBits(bmp2Data);
+            newBmp.UnlockBits(newBmpData);
+            #endregion
+            return newBmp;
         }
 
         private static int ConvertTo1DArr(int x, int y, int width)
