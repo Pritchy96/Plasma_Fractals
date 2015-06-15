@@ -118,10 +118,10 @@ namespace Plasma_Fractal
         public static Bitmap ShapeIsland(Bitmap fractal)
         {
             Bitmap bitmap = new Bitmap(fractal);
+            maxDistance = Math.Sqrt((Math.Pow(centerX, 2)) + (Math.Pow(centerY, 2)));
             // Lock the bitmap's bits.  
             Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            maxDistance = Math.Sqrt((Math.Pow(centerX, 2)) + (Math.Pow(centerY, 2)));
-
+            
             BitmapData mapBmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
 
             // Get the address of the first line.
@@ -188,7 +188,86 @@ namespace Plasma_Fractal
             bitmap.UnlockBits(mapBmpData);
             return bitmap;
         }
-        
+
+        public static void CalculateBiomes(Bitmap islandFractal, Bitmap islandShape, Bitmap heightFractal, Bitmap tempFractal, Bitmap RainFractal)
+        {
+            Bitmap colouredIsland = new Bitmap(islandFractal.Width, islandFractal.Height);
+
+            //All the bitmaps are the same size, so just use islandFractals height and width for all.
+            Rectangle rect = new Rectangle(0, 0, islandFractal.Width, islandFractal.Height);
+   
+            //Lock all the bitmaps
+            BitmapData islandFractalData = islandFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                islandShapeData = islandShape.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                heightFractalData = heightFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                tempFractalData = tempFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb),
+                rainFractalData = RainFractal.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+            int mapBytes = Math.Abs(islandFractalData.Stride) * islandFractal.Height;
+
+            #region Locking bitmaps
+            //This is explained in the MakeFractal Method.
+            IntPtr islandFractalPtr = islandFractalData.Scan0;
+            byte[] islandFractalRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(islandFractalPtr, islandFractalRbgValues, 0, mapBytes);
+
+            IntPtr islandShapePtr = islandShapeData.Scan0;
+            byte[] islandShapeRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(islandShapePtr, islandShapeRbgValues, 0, mapBytes);
+
+            IntPtr heightFractalPtr = heightFractalData.Scan0;
+            byte[] heightFractalRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(heightFractalPtr, heightFractalRbgValues, 0, mapBytes);
+
+            IntPtr tempFractalPtr = tempFractalData.Scan0;
+            byte[] tempFractalRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(tempFractalPtr, tempFractalRbgValues, 0, mapBytes);
+
+            IntPtr rainFractalPtr = rainFractalData.Scan0;
+            byte[] rainFractalRbgValues = new byte[mapBytes];
+            System.Runtime.InteropServices.Marshal.Copy(rainFractalPtr, rainFractalRbgValues, 0, mapBytes);
+            #endregion
+
+            for (int x = 0; x < islandFractal.Width; x++)
+            {
+                for (int y = 0; y < islandFractal.Height; y++)
+                {
+                    int bytePosition = ConvertTo1DArr(x, y, islandFractal.Width);
+
+                    if (islandShapeRbgValues[bytePosition] == 255)  //Land
+                    {
+                        if (heightFractalRbgValues[bytePosition] < 150) //Low areas
+                        {
+                            //Follow Whittaker here.
+                        }
+                        else //Mountains
+                        {
+                            
+                        }
+
+                    }
+                    else //Sea
+                    {
+                        
+                    }
+                }
+            }
+
+            #region Unlocking Bitmaps.
+            // Copy the RGB values back to the bitmap, and then unlocking.
+            System.Runtime.InteropServices.Marshal.Copy(islandFractalRbgValues, 0, islandFractalPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(islandShapeRbgValues, 0, islandShapePtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(heightFractalRbgValues, 0, heightFractalPtr, mapBytes);
+            System.Runtime.InteropServices.Marshal.Copy(tempFractalRbgValues, 0, tempFractalPtr, mapBytes);
+
+            islandFractal.UnlockBits(islandFractalData);
+            islandShape.UnlockBits(islandShapeData);
+            heightFractal.UnlockBits(heightFractalData);
+            tempFractal.UnlockBits(tempFractalData);
+            #endregion
+
+        }
+
         public static Bitmap ColourBitmap(Bitmap map, Bitmap shaderMap = null, bool noise = true, int rivers = 0, int alpha = 255)
         {
             Bitmap colouredMap = new Bitmap(map);
