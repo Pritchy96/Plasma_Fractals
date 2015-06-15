@@ -34,8 +34,12 @@ namespace Plasma_Fractal
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
-            islandFractal = Fractal_Creator.MakeFractal(width, height, 12);
+            islandFractal = Fractal_Creator.MakeFractal(width, height, 12); 
             islandShape = Fractal_Creator.ShapeIsland(islandFractal);
+
+            temperateFractal = Fractal_Creator.MakeFractal(width, height, 20);
+            heightFractal = Fractal_Creator.MakeFractal(width, height, 30);
+           
         }
 
         public void Update()
@@ -53,6 +57,8 @@ namespace Plasma_Fractal
             {
                 islandFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "islandFractal.bmp"), ImageFormat.Bmp);
                 islandShape.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "islandShape.bmp"), ImageFormat.Bmp);
+                temperateFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "temperateFractal.bmp"), ImageFormat.Bmp);
+                heightFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "heightFractal.bmp"), ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
             }
         }

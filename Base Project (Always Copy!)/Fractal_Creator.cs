@@ -139,25 +139,27 @@ namespace Plasma_Fractal
             {
                 for (int y = 0; y < bitmap.Height; y++)
                 {
+                    #region Generating Island Shape
                     //Calculate where the position of the blue (remember BGR not RGB) byte for the pixel at positon (X, Y) on the bitmap image is in the 1D byte array.
-                    int bytePosition = ConvertTo1DArr((int)x, (int)y, bitmap.Width);
-                    double distX = Math.Abs(x - centerX), distY = Math.Abs(y - centerY);
-                    double distance = Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));
+                    int bytePosition = ConvertTo1DArr((int)x, (int)y, bitmap.Width);    //Convert to a 1D array from x, y position.
+                    double distX = Math.Abs(x - centerX), distY = Math.Abs(y - centerY);    //Distance fron center in x and y.
+                    double distance = Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));   //Distance from center.
+                    double fractalValue = mapRgbValues[bytePosition];   //Retrieve the fractal value at position (x, y).
+                    double heightValue = fractalValue/255;   //Height value generated from random plasma noise. dictates how chaotic the island is.
+                    double gradientValue = ((distance / maxDistance));  //Gradient used to get an island shape
+                    int gradientStrength = 255; //how prevalent the Circular gradient is in the final value. Reduce to make reduce the centering effect. Not reccomended to change below 255.
+                    int heightStrength = 100;   //How prevalant the heightmap is in the final value. Reduce for smaller, less chaotic islands.
+                    int offset = 90;    //Offset used to make boost the value to make bigger islands. Reduce for smaller islands.
 
-                    //Average the points of the pixel sized rectangle down into a single number, which is that pixels final gradientValue.
-                    double heightValue = mapRgbValues[bytePosition]/255;   //Height value generated from random plasma noise.
-                    byte gradientValue = (byte)(((double)distance / maxDistance));  //Gradient used to get an island shape
-                    int gradientStrength = 100; //how prevalent the gradient is in the final value. Keep high. Out of 255.
-                    int heightStrength = 125;   //How prevalant the heightmap is in the final value. Should be kept lower.
-                    int offset = 0;    //Offset used to make boost the value to make bigger islands. Reduce for smaller islands.
+                    byte finalValue = (byte)((heightStrength * heightValue) - (gradientValue * gradientStrength) + offset); //Construct the final value for the island.
+                    #endregion
 
-                    byte finalValue = (byte)((heightStrength * heightValue) + (gradientValue * gradientStrength) + offset);
-                    
+                    #region Removing Fractal (blue for land, black for sea).
                     //Keep value between 0 and 255
                     if (finalValue > 109 || distance > maxDistance - 50)    //If we're high enough to be considered ocean or close to the edge.
                     {
                         //If we're close to the center and it's going to be water, instead make it land.  
-                        if (distance < 150)
+                        if (distance < 170)
                         {
                             finalValue = 255;
                             //finalValue = (byte)Math.Min(255, (finalValue + (int)(((float)finalValue / 255) * rand.Next(-5, 5))));
@@ -172,6 +174,7 @@ namespace Plasma_Fractal
                         finalValue = 255;
                         //finalValue = (byte)Math.Min(255, (finalValue + (int)(((float)finalValue / 255) * rand.Next(-5, 5))));
                     }
+                    #endregion
 
                     //Only needs to set one of the RGB values in the byte array as it is grey, and the colour methods only look at the first one (Blue, remember BGR not RGB).
                     mapRgbValues[bytePosition] = finalValue;
