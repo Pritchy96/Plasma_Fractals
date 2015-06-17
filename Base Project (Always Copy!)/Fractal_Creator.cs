@@ -72,7 +72,7 @@ namespace Plasma_Fractal
         /// <param name="c2"></param>
         /// <param name="c3"></param>
         /// <param name="c4"></param>
-        private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1,
+        private static void Divide(byte[] mapRgbValues, int bitmapWidth, double x, double y, double width, double height, double c1,    
             double c2, double c3, double c4, int minValue, int maxValue)
         {
             //X and Y are the old c1 coordinates from the last recursive iteration.
@@ -275,8 +275,211 @@ namespace Plasma_Fractal
                     {
                         if (heightFractalRbgValues[i] < 190) //Low areas
                         {
-                            if (rainFractalRbgValues[i] < 30 && tempFractalRbgValues[i] > 10)
+                            if (tempFractalRbgValues[i] < 20)
+                            {   
+                                //Tundra
+                                colouredIslandRbgValues[i] = 249;
+                                colouredIslandRbgValues[i + 1] = 235;
+                                colouredIslandRbgValues[i + 2] = 85;
+                            }
+                            else if (tempFractalRbgValues[i] < 40)
                             {
+                                if (rainFractalRbgValues[i] < 10)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 20)
+                                {
+                                    //Sand
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 60)
+                                {
+                                    //Taiga
+                                    colouredIslandRbgValues[i] = 33;
+                                    colouredIslandRbgValues[i + 1] = 102;
+                                    colouredIslandRbgValues[i + 2] = 5;
+                                }
+                                else
+                                {
+                                    //Swamp
+                                    colouredIslandRbgValues[i] = 0;
+                                    colouredIslandRbgValues[i + 1] = 102;
+                                    colouredIslandRbgValues[i + 2] = 76;
+                                }
+                            }
+                            else if (tempFractalRbgValues[i] < 50)
+                            {
+                                if (rainFractalRbgValues[i] < 10)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 20)
+                                {
+                                    //Sand
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 50)
+                                {
+                                    //Dedious Forest
+                                    colouredIslandRbgValues[i] = 83;
+                                    colouredIslandRbgValues[i + 1] = 177;
+                                    colouredIslandRbgValues[i + 2] = 46;
+                                }
+                                else if (rainFractalRbgValues[i] < 80)
+                                {
+                                    //Rain Forest
+                                    colouredIslandRbgValues[i] = 162;
+                                    colouredIslandRbgValues[i + 1] = 249;
+                                    colouredIslandRbgValues[i + 2] = 7;
+                                }
+                                else
+                                {
+                                    //Swamp
+                                    colouredIslandRbgValues[i] = 0;
+                                    colouredIslandRbgValues[i + 1] = 102;
+                                    colouredIslandRbgValues[i + 2] = 76;
+                                }
+                            }
+                            else if (tempFractalRbgValues[i] < 60)
+                            {
+                                /*
+                                if (rainFractalRbgValues[i] < 10)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 30)
+                                {
+                                    //Sand
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                 * */
+                                 if (rainFractalRbgValues[i] < 50)
+                                {
+                                    //Dedious Forest
+                                    colouredIslandRbgValues[i] = 83;
+                                    colouredIslandRbgValues[i + 1] = 177;
+                                    colouredIslandRbgValues[i + 2] = 46;
+                                }
+                                else if (rainFractalRbgValues[i] < 80)
+                                {
+                                    //Rain Forest
+                                    colouredIslandRbgValues[i] = 162;
+                                    colouredIslandRbgValues[i + 1] = 249;
+                                    colouredIslandRbgValues[i + 2] = 7;
+                                }
+                                else
+                                {
+                                    //Swamp
+                                    colouredIslandRbgValues[i] = 0;
+                                    colouredIslandRbgValues[i + 1] = 102;
+                                    colouredIslandRbgValues[i + 2] = 76;
+                                }
+                            }
+                            else if (tempFractalRbgValues[i] < 70)
+                            {
+                                if (rainFractalRbgValues[i] < 10)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 30)
+                                {
+                                    //Sand
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 60)
+                                {
+                                    //Dedious Forest
+                                    colouredIslandRbgValues[i] = 83;
+                                    colouredIslandRbgValues[i + 1] = 177;
+                                    colouredIslandRbgValues[i + 2] = 46;
+                                }
+                                else if (rainFractalRbgValues[i] < 80)
+                                {
+                                    //Rain Forest
+                                    colouredIslandRbgValues[i] = 162;
+                                    colouredIslandRbgValues[i + 1] = 249;
+                                    colouredIslandRbgValues[i + 2] = 7;
+                                }
+                                else
+                                {
+                                    //Swamp
+                                    colouredIslandRbgValues[i] = 0;
+                                    colouredIslandRbgValues[i + 1] = 102;
+                                    colouredIslandRbgValues[i + 2] = 76;
+                                }
+                            }
+                            else if (tempFractalRbgValues[i] < 90)
+                            {
+                                if (rainFractalRbgValues[i] < 20)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 60)
+                                {
+                                    //Tropical Seasonal Forest/Savanna
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else
+                                {
+                                    //Tropical Forest
+                                    colouredIslandRbgValues[i] = 35;
+                                    colouredIslandRbgValues[i + 1] = 224;
+                                    colouredIslandRbgValues[i + 2] = 155;
+                                }
+                            }
+                            else
+                            {
+                                if (rainFractalRbgValues[i] < 30)
+                                {
+                                    //Tropical Sand
+                                    colouredIslandRbgValues[i] = 24;
+                                    colouredIslandRbgValues[i + 1] = 148;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else if (rainFractalRbgValues[i] < 70)
+                                {
+                                    //Tropical Seasonal Forest/Savanna
+                                    colouredIslandRbgValues[i] = 7;
+                                    colouredIslandRbgValues[i + 1] = 219;
+                                    colouredIslandRbgValues[i + 2] = 250;
+                                }
+                                else
+                                {
+                                    //Tropical Forest
+                                    colouredIslandRbgValues[i] = 35;
+                                    colouredIslandRbgValues[i + 1] = 224;
+                                    colouredIslandRbgValues[i + 2] = 155;
+                                }
+                            }
+/*
+                            if (rainFractalRbgValues[i] < 30 && tempFractalRbgValues[i] > 10)   //Sand
+                            {   
                                 colouredIslandRbgValues[i] = 18;
                                 colouredIslandRbgValues[i + 1] = 104;
                                 colouredIslandRbgValues[i + 2] = 141;
@@ -284,10 +487,11 @@ namespace Plasma_Fractal
                             else
                             {
                                 //Follow Whittaker here.
-                                colouredIslandRbgValues[i] = (byte)(60);
-                                colouredIslandRbgValues[i + 1] = (byte)(95);
-                                colouredIslandRbgValues[i + 2] = (byte)(48);
+                                colouredIslandRbgValues[i] = 60;
+                                colouredIslandRbgValues[i + 1] = 95;
+                                colouredIslandRbgValues[i + 2] = 48;
                             }
+ * */
                         }
                         else //Mountains
                         {
@@ -299,9 +503,21 @@ namespace Plasma_Fractal
                     }
                     else //Sea
                     {
-                        colouredIslandRbgValues[i] = 73;
-                        colouredIslandRbgValues[i + 1] = 60;
-                        colouredIslandRbgValues[i + 2] = 38;
+                        if (heightFractalRbgValues[i] < 58) //Deep areas
+                        {
+                            colouredIslandRbgValues[i] = 63;
+                            colouredIslandRbgValues[i + 1] = 50;
+                            colouredIslandRbgValues[i + 2] = 28;
+                        }
+                        else
+                        {
+                            //Inner sea
+                        }
+                        {
+                            colouredIslandRbgValues[i] = 73;
+                            colouredIslandRbgValues[i + 1] = 60;
+                            colouredIslandRbgValues[i + 2] = 38;
+                        }
                     }
                 }
             }
@@ -639,7 +855,7 @@ namespace Plasma_Fractal
                 for (int y = 0; y < bmp1.Height; y++)
                 {
                     int i = ConvertTo1DArr(x, y, bmp1.Width);
-                    Byte val = (byte)(((double)bmp1RbgValues[i] * bmp1Coeff) - ((double)bmp2RbgValues[i] * bmp2Coeff) + offset);
+                    double val = ((bmp1RbgValues[i] * bmp1Coeff) + (bmp2RbgValues[i] * bmp2Coeff));
 
                     if (val > 255)
                     {
@@ -650,7 +866,7 @@ namespace Plasma_Fractal
                         val = 0;
                     }
 
-                    newBmpRbgValues[i] = val;
+                    newBmpRbgValues[i] = (byte)(255 - val);
                 }
             }
             #region Unlocking Bitmaps

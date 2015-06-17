@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,12 +38,15 @@ namespace Plasma_Fractal
             islandFractal = Fractal_Creator.MakeFractal(width, height, 12); 
             islandShape = Fractal_Creator.ShapeIsland(islandFractal);
 
-            temperateFractal = Fractal_Creator.MakeFractal(width, height, 12, 40, 0);
+            temperateFractal = Fractal_Creator.MakeFractal(width, height, 4, 100, 0);
+            
+            rainFractal = Fractal_Creator.MakeFractal(width, height, 4, 100, 0);
             heightFractal = Fractal_Creator.MakeFractal(width, height, 12);
-            rainFractal = Fractal_Creator.MakeFractal(width, height, 12, 225, 0);
             gradientMap = Fractal_Creator.CalculateGradient(width, height, 255, 0);
 
-            heightFractal = Fractal_Creator.InterpolateBitmaps(heightFractal, gradientMap, 0.3, 0.9);
+
+            heightFractal = Fractal_Creator.InterpolateBitmaps(heightFractal, gradientMap, 0.3, 1);
+            temperateFractal = Fractal_Creator.InterpolateBitmaps(temperateFractal, gradientMap, 1, 1, 0);
             islandColoured = Fractal_Creator.CalculateBiomes(islandFractal, islandShape, heightFractal, temperateFractal, rainFractal);
         }
 
@@ -59,10 +63,15 @@ namespace Plasma_Fractal
         {
             if (e.Button == MouseButtons.Left)
             {
-                islandFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "islandFractal.bmp"), ImageFormat.Bmp);
-                islandShape.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "islandShape.bmp"), ImageFormat.Bmp);
-                temperateFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "temperateFractal.bmp"), ImageFormat.Bmp);
-                heightFractal.Save(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "heightFractal.bmp"), ImageFormat.Bmp);
+                DirectoryInfo dir = Directory.CreateDirectory(System.IO.Path.Combine(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Island")));
+
+                //dir.FullName
+                islandFractal.Save(System.IO.Path.Combine(dir.FullName, "islandFractal.bmp"), ImageFormat.Bmp);
+                islandShape.Save(System.IO.Path.Combine(dir.FullName, "islandShape.bmp"), ImageFormat.Bmp);
+                islandColoured.Save(System.IO.Path.Combine(dir.FullName, "islandColoured.bmp"), ImageFormat.Bmp);
+                temperateFractal.Save(System.IO.Path.Combine(dir.FullName, "temperateFractal.bmp"), ImageFormat.Bmp);
+                heightFractal.Save(System.IO.Path.Combine(dir.FullName, "heightFractal.bmp"), ImageFormat.Bmp);
+                rainFractal.Save(System.IO.Path.Combine(dir.FullName, "rainFractal.bmp"), ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
             }
         }
@@ -85,7 +94,7 @@ namespace Plasma_Fractal
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(heightFractal, Point.Empty);
+            e.Graphics.DrawImage(islandColoured, Point.Empty);
         }
     }
 }
