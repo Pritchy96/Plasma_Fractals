@@ -48,8 +48,5 @@ namespace Plasma_Fractal
                 MessageBox.Show("Please enter a Width and Height!");
             }
         }
-
-
-
     }
 }

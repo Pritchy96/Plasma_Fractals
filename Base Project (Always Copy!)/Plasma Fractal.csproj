@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bitmap_Utils.cs" />
     <Compile Include="DBPanel.cs">
       <SubType>Component</SubType>
     </Compile>

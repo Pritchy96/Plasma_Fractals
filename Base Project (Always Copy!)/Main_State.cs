@@ -12,10 +12,11 @@ namespace Plasma_Fractal
 {
     public class Main_State
     {
-        Bitmap islandFractal, islandShape, temperateFractal, heightFractal, rainFractal, islandColoured, gradientMap;
+        int[,] islandFractal, islandShape, temperateFractal, heightFractal, rainFractal, islandColoured, gradientMap;
         Island_Display islandDisplay;
         Gen_Menu optionsMenu;
         Random rand = new Random();
+        Bitmap islandColour;
 
         public Main_State(int width, int height, Island_Display islandDisplay)
         {
@@ -31,7 +32,7 @@ namespace Plasma_Fractal
 
         public void MakeIsland(int width, int height, bool coloured = true, bool shaded = true, bool noise = true, int rivers = 0, int baseRoughness = 4, int shaderRoughness = 18)
         {
-            islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the bitmap)
+            islandDisplay.DrawScreen.Size = new Size(width, height);    //Set size of the screen to be drawn to (holding the map)
             Size border = islandDisplay.Size - islandDisplay.ClientSize;    //Size of window borders.
             islandDisplay.MaximumSize = new Size(width, height) + border;   //Sets max form size (so user can't make it bigger than the map, leading to ugly white borders.
 
@@ -40,14 +41,18 @@ namespace Plasma_Fractal
 
             temperateFractal = Fractal_Creator.MakeFractal(width, height, 4, 100, 0);
             
+            
             rainFractal = Fractal_Creator.MakeFractal(width, height, 4, 100, 0);
             heightFractal = Fractal_Creator.MakeFractal(width, height, 12);
-            gradientMap = Fractal_Creator.CalculateGradient(width, height, 255, 0);
+            gradientMap = Bitmap_Utils.MakeCircularGradient(width, height, 255, 0);
 
-
-            heightFractal = Fractal_Creator.InterpolateBitmaps(heightFractal, gradientMap, 0.3, 1);
-            temperateFractal = Fractal_Creator.InterpolateBitmaps(temperateFractal, gradientMap, 1, 1, 0);
+            
+            heightFractal = Bitmap_Utils.InterpolateBitmaps(heightFractal, gradientMap, 0.3, 1);
+            temperateFractal = Bitmap_Utils.InterpolateBitmaps(temperateFractal, gradientMap, 1, 1, 0);
             islandColoured = Fractal_Creator.CalculateBiomes(islandFractal, islandShape, heightFractal, temperateFractal, rainFractal);
+
+
+            islandColour = Bitmap_Utils.BiomeArrayToBitmap(islandColoured);
         }
 
         public void Update()
@@ -66,6 +71,7 @@ namespace Plasma_Fractal
                 DirectoryInfo dir = Directory.CreateDirectory(System.IO.Path.Combine(System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "Island")));
 
                 //dir.FullName
+                /*
                 islandFractal.Save(System.IO.Path.Combine(dir.FullName, "islandFractal.bmp"), ImageFormat.Bmp);
                 islandShape.Save(System.IO.Path.Combine(dir.FullName, "islandShape.bmp"), ImageFormat.Bmp);
                 islandColoured.Save(System.IO.Path.Combine(dir.FullName, "islandColoured.bmp"), ImageFormat.Bmp);
@@ -73,6 +79,7 @@ namespace Plasma_Fractal
                 heightFractal.Save(System.IO.Path.Combine(dir.FullName, "heightFractal.bmp"), ImageFormat.Bmp);
                 rainFractal.Save(System.IO.Path.Combine(dir.FullName, "rainFractal.bmp"), ImageFormat.Bmp);
                 MessageBox.Show("Image Saved to Desktop!");
+                 * */
             }
         }
 
@@ -94,7 +101,7 @@ namespace Plasma_Fractal
         public void Redraw(PaintEventArgs e)
         {
             //Draws 'compiled' Image, starting at 0, 0, of course.
-            e.Graphics.DrawImage(islandColoured, Point.Empty);
+            e.Graphics.DrawImage(islandColour, Point.Empty);
         }
     }
 }
