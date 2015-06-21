@@ -14,7 +14,7 @@ namespace Plasma_Fractal
     {
         public static int[,] MakeCircularGradient(int width, int height, int maxValue = 255, int minValue = 0)
         {
-            int[,] map = new int[width, height];
+            int[,] map = new int[width,height];
 
             // Lock the map's bits.  
             double maxDistance = 0, centerX = width / 2, centerY = height / 2;
@@ -28,7 +28,7 @@ namespace Plasma_Fractal
                     double distX = Math.Abs(x - centerX), distY = Math.Abs(y - centerY);    //Distance fron center in x and y.
                     double distance = Math.Sqrt(Math.Pow(distX, 2) + Math.Pow(distY, 2));   //Distance from center.
 
-                    map[x, y] = (int)((distance / maxDistance) * 255);
+                    map[x,y] = (int)((distance / maxDistance) * 255);
                 }
             }
             return map;
@@ -45,7 +45,7 @@ namespace Plasma_Fractal
                 for (int y = 0; y < height; y++)
                 {
 
-                    double val = ((bmp1[x, y] * bmp1Coeff) + (bmp2[x, y] * bmp2Coeff));
+                    double val = ((bmp1[x,y] * bmp1Coeff) + (bmp2[x,y] * bmp2Coeff));
 
                     if (val > maxValue)
                     {
@@ -56,7 +56,7 @@ namespace Plasma_Fractal
                         val = minValue;
                     }
 
-                    newBmp[x, y] = (int)(val);
+                    newBmp[x,y] = (int)(val);
                 }
             }
 
@@ -125,7 +125,7 @@ namespace Plasma_Fractal
                     int j = ConvertTo1DArr(x, y, width);
                     int i = j * 3;
 
-                    switch (array[x, y])
+                    switch (array[x,y])
                     {
                         case -2:
                             {

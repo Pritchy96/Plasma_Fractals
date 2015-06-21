@@ -23,7 +23,7 @@ namespace Plasma_Fractal
             maxDistance = Math.Sqrt((Math.Pow(centerX, 2)) + (Math.Pow(centerY, 2)));
             roughness = Roughness;
 
-            int[,] map = new int[width, height];
+            int[,] map = new int[width,height];
 
             //Calculate corner values (c1, c2, c3, c4).
             double c1 = rand.NextDouble();
@@ -144,7 +144,7 @@ namespace Plasma_Fractal
             }
 
             return map;
-        }
+        }  
 
         public static int[,] CalculateBiomes(int[,] islandFractal, int[,] islandShape, int[,] heightFractal, int[,] tempFractal, int[,] rainFractal)
         {
